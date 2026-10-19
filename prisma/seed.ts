@@ -1,18 +1,21 @@
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "../generated/prisma/client";
 import { hash } from "bcryptjs";
 import imageMapping from "../assets/candy-collection/shop-assets/image-mapping.json";
+
+const products = [
+  { id: 0, name: "ランダム缶バッジ", category: "グッズ", salesType: "PRE_SALE", description: "", thumbnailImageUrl: "/products/candy/product-0.webp" },
+  { id: 1, name: "クリアファイル", category: "グッズ", salesType: "PERMANENT", description: "", thumbnailImageUrl: "/products/candy/product-1.webp" },
+  { id: 2, name: "アクリルスタンド", category: "グッズ", salesType: "MADE_TO_ORDER", description: "", thumbnailImageUrl: "/products/candy/product-2.webp" },
+  { id: 3, name: "タペストリー", category: "グッズ", salesType: "POST_EVENT", description: "", thumbnailImageUrl: "/products/candy/product-3.webp" },
+  { id: 4, name: "オリジナル TEE", category: "グッズ", salesType: "PERMANENT", description: "", thumbnailImageUrl: "/products/candy/product-4.webp" },
+] satisfies Prisma.ProductCreateManyInput[]
 
 async function main() {
   const demoPasswordHash = await hash("demo-password", 12)
 
   await prisma.product.createMany({
-    data: [
-      { id: 0, name: "ランダム缶バッジ", category: "グッズ", description: "", thumbnailImageUrl: "/products/candy/product-0.webp" },
-      { id: 1, name: "クリアファイル", category: "グッズ", description: "", thumbnailImageUrl: "/products/candy/product-1.webp" },
-      { id: 2, name: "アクリルスタンド", category: "グッズ", description: "", thumbnailImageUrl: "/products/candy/product-2.webp" },
-      { id: 3, name: "タペストリー", category: "グッズ", description: "", thumbnailImageUrl: "/products/candy/product-3.webp" },
-      { id: 4, name: "オリジナル TEE", category: "グッズ", description: "", thumbnailImageUrl: "/products/candy/product-4.webp" },
-    ],
+    data: products,
     skipDuplicates: true
   })
 
@@ -32,8 +35,14 @@ async function main() {
     skipDuplicates: true
   })
 
-  // createMany skips existing IDs; refresh only the matching catalog images.
+  // createMany skips existing IDs; refresh only the matching catalog images and sales types.
   await prisma.$transaction([
+    ...products.map(({ id, name, salesType }) =>
+      prisma.product.updateMany({
+        where: { id, name },
+        data: { salesType },
+      })
+    ),
     ...imageMapping.products.map(({ id, name, thumbnailImageUrl }) =>
       prisma.product.updateMany({
         where: { id, name },

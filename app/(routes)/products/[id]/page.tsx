@@ -10,6 +10,7 @@ import Breadcrumb from "@/app/components/Breadcrumb"
 import CandyPill from "@/app/components/CandyPill"
 import PurchaseAssurance, { demoAssurances } from "@/app/components/PurchaseAssurance"
 import { toNonNegativeInteger } from "@/lib/validation"
+import { salesTypeMeta } from "@/lib/salesTypes"
 import { notFound } from "next/navigation"
 
 export default async function Page({ params }: { 
@@ -38,7 +39,10 @@ export default async function Page({ params }: {
         <div className="lg:sticky lg:top-24 lg:self-start">
           <div className="space-y-6 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
             <div className="space-y-4">
-              <CandyPill tone="lemon">{product.category || "カテゴリー指定なし"}</CandyPill>
+              <div className="flex flex-wrap gap-2">
+                <CandyPill tone={salesTypeMeta[product.salesType].tone}>{salesTypeMeta[product.salesType].label}</CandyPill>
+                <span className="inline-flex w-fit items-center border px-2.5 py-1 text-xs font-medium">{product.category || "カテゴリー指定なし"}</span>
+              </div>
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.name}</h1>
               <p className="text-2xl font-semibold text-primary">¥{minPrice.toLocaleString()}〜</p>
               <p className="leading-7 text-muted-foreground">{product.description || "日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。"}</p>

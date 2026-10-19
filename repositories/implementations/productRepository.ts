@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import type { SalesType } from "@/lib/salesTypes"
 import { IProductRepository } from "../interfaces/IProductRepository"
 
 export class ProductRepository implements IProductRepository {
@@ -10,8 +11,9 @@ export class ProductRepository implements IProductRepository {
       where: { id: productId }
     })
   }
-  async findManyWithVariants() {
+  async findManyWithVariants(salesType?: SalesType | null) {
     return await prisma.product.findMany({
+      where: salesType ? { salesType } : undefined,
       include: { variants: true }
     })
   }
