@@ -4,10 +4,11 @@ import { useState } from "react"
 import ProductImageGallery, { type GalleryImage } from "@/app/components/ProductImageGallery"
 import CandyPill from "@/app/components/CandyPill"
 import { Variant } from "@/lib/types"
+import { salesTypeMeta, type SalesType } from "@/lib/salesTypes"
 import { ProductActions } from "./ProductActions"
 
 export default function ProductDetailView({ product, images, variants, variantImages, children }: {
-  product: { name: string; category: string | null; description: string }
+  product: { name: string; category: string | null; description: string; salesType: SalesType }
   images: GalleryImage[]
   variants: Variant[]
   variantImages: Record<number, string>
@@ -32,7 +33,10 @@ export default function ProductDetailView({ product, images, variants, variantIm
       <div className="lg:sticky lg:top-24 lg:self-start">
         <div className="space-y-6 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
           <div className="space-y-4">
-            <CandyPill tone="lemon">{product.category || "カテゴリー指定なし"}</CandyPill>
+            <div className="flex flex-wrap gap-2">
+              <CandyPill tone={salesTypeMeta[product.salesType].tone}>{salesTypeMeta[product.salesType].label}</CandyPill>
+              <span className="inline-flex w-fit items-center border px-2.5 py-1 text-xs font-medium">{product.category || "カテゴリー指定なし"}</span>
+            </div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.name}</h1>
             <p className="text-2xl font-semibold text-primary">
               ¥{selectedVariant.price.toLocaleString()}

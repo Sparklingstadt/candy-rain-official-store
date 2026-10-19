@@ -13,7 +13,7 @@
     - button "クリアファイルの画像を表示" [pressed]
     - button "クリアファイル Aの画像を表示"
     - button "クリアファイル Bの画像を表示"
-  - text: グッズ
+  - text: 常設 グッズ
   - heading "クリアファイル" [level=1]
   - paragraph: /¥\d+クリアファイル A/
   - paragraph: 日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。

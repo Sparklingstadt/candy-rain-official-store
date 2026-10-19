@@ -6,8 +6,9 @@ import { IOrderRepository } from "@/repositories/interfaces/IOrderRepository"
 import { IProductRepository } from "@/repositories/interfaces/IProductRepository"
 import { IUserRepository } from "@/repositories/interfaces/IUserRepository"
 import { IVariantRepository } from "@/repositories/interfaces/IVariantRepository"
+import type { SalesType } from "@/lib/salesTypes"
 
-export const getProductsWithVariants = (repo: IProductRepository) => repo.findManyWithVariants()
+export const getProductsWithVariants = (repo: IProductRepository, salesType?: SalesType | null) => repo.findManyWithVariants(salesType)
 export const getProductById = (repo: IProductRepository, productId: number) => repo.findById(productId)
 export const getVariantsByProductId = (repo: IVariantRepository, productId: number) => repo.findManyByProductId(productId)
 export const getUserByUserId = (repo: IUserRepository, userId: number) => repo.findByUserId(userId)

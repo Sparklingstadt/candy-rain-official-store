@@ -38,7 +38,7 @@ export default async function Page({ params }: {
       <Breadcrumb items={[{ href: "/", label: "ホーム" }, { href: "/products", label: "商品一覧" }]} current={product.name} />
       <ProductDetailView
         key={product.id}
-        product={{ name: product.name, category: product.category, description: product.description }}
+        product={{ name: product.name, category: product.category, description: product.description, salesType: product.salesType }}
         images={images}
         variants={variants}
         variantImages={variantImages}

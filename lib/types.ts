@@ -1,7 +1,10 @@
+import type { SalesType } from "./salesTypes"
+
 export type Product = {
   id: number,
   name: string,
   category: string | null,
+  salesType: SalesType,
   description: string,
   thumbnailImageUrl: string,
 }
