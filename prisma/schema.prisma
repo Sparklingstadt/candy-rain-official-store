@@ -26,9 +26,17 @@ model Product {
   id Int @id @default(autoincrement())
   name String
   category String?
+  salesType SalesType @default(PERMANENT)
   description String
   variants Variant[]
   thumbnailImageUrl String
+}
+
+enum SalesType {
+  PRE_SALE
+  MADE_TO_ORDER
+  POST_EVENT
+  PERMANENT
 }
 
 model Variant {

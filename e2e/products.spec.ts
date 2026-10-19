@@ -29,6 +29,21 @@ test.describe("商品操作 (#21)", () => {
     await expect(page.getByRole("heading", { name: "Products", exact: true })).toBeVisible()
   })
 
+  test("販売区分のタブで商品を絞り込める", async ({ page, shopper }) => {
+    await shopper.signIn(page)
+    const filter = page.getByRole("navigation", { name: "販売区分で絞り込み" })
+    await filter.getByRole("link", { name: "受注販売", exact: true }).click()
+    await expect(page).toHaveURL(/\/products\?type=made-to-order$/)
+    await expect(filter.getByRole("link", { name: "受注販売", exact: true })).toHaveAttribute("aria-current", "page")
+    await expect(page.getByRole("heading", { name: "アクリルスタンド", exact: true })).toBeVisible()
+    await expect(page.getByRole("heading", { level: 2 })).toHaveCount(1)
+    await filter.getByRole("link", { name: "すべて", exact: true }).click()
+    await expect(page.getByRole("heading", { level: 2 })).toHaveCount(5)
+    await page.goto("/products?type=unknown")
+    await expect(filter.getByRole("link", { name: "すべて", exact: true })).toHaveAttribute("aria-current", "page")
+    await expect(page.getByRole("heading", { level: 2 })).toHaveCount(5)
+  })
+
   for (const id of ["999999", "invalid", "-1"]) {
     test(`存在しない・不正な商品ID ${id} に404を表示する`, async ({ page, shopper }) => {
       await shopper.signIn(page)

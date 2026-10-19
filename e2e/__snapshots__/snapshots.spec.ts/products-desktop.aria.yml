@@ -2,31 +2,48 @@
   - text: Collection
   - heading "Products" [level=1]
   - paragraph: 毎日に小さな彩りを添える、Candy Rain Storeのオリジナルグッズ。
-  - link /ランダム缶バッジ グッズ ランダム缶バッジ ¥\d+〜/:
+  - navigation "販売区分で絞り込み":
+    - list:
+      - listitem:
+        - link "すべて":
+          - /url: /products
+      - listitem:
+        - link "事前販売":
+          - /url: /products?type=pre-sale
+      - listitem:
+        - link "受注販売":
+          - /url: /products?type=made-to-order
+      - listitem:
+        - link "事後通販":
+          - /url: /products?type=post-event
+      - listitem:
+        - link "常設":
+          - /url: /products?type=permanent
+  - link /ランダム缶バッジ グッズ 事前販売 ランダム缶バッジ ¥\d+〜/:
     - /url: /products/0
     - img "ランダム缶バッジ"
     - text: ""
     - heading "ランダム缶バッジ" [level=2]
     - paragraph: /¥\d+〜/
-  - link /クリアファイル グッズ クリアファイル ¥\d+〜/:
+  - link /クリアファイル グッズ 常設 クリアファイル ¥\d+〜/:
     - /url: /products/1
     - img "クリアファイル"
     - text: ""
     - heading "クリアファイル" [level=2]
     - paragraph: /¥\d+〜/
-  - link /アクリルスタンド グッズ アクリルスタンド ¥\d+,\d+〜/:
+  - link /アクリルスタンド グッズ 受注販売 アクリルスタンド ¥\d+,\d+〜/:
     - /url: /products/2
     - img "アクリルスタンド"
     - text: ""
     - heading "アクリルスタンド" [level=2]
     - paragraph: /¥\d+,\d+〜/
-  - link /タペストリー グッズ タペストリー ¥\d+,\d+〜/:
+  - link /タペストリー グッズ 事後通販 タペストリー ¥\d+,\d+〜/:
     - /url: /products/3
     - img "タペストリー"
     - text: ""
     - heading "タペストリー" [level=2]
     - paragraph: /¥\d+,\d+〜/
-  - link /オリジナル TEE グッズ オリジナル TEE ¥\d+,\d+〜/:
+  - link /オリジナル TEE グッズ 常設 オリジナル TEE ¥\d+,\d+〜/:
     - /url: /products/4
     - img "オリジナル TEE"
     - text: ""

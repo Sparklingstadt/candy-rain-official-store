@@ -1,3 +1,4 @@
+import type { SalesType } from "@/lib/salesTypes"
 import { Variant } from "./Variant"
 
 export class Product {
@@ -5,6 +6,7 @@ export class Product {
     public readonly id: number,
     public readonly name: string,
     public readonly category: string | null,
+    public readonly salesType: SalesType,
     public readonly description: string,
     public readonly thumbnailImageUrl: string,
   ) {

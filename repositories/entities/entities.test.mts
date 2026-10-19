@@ -9,10 +9,11 @@ import { User } from "./User"
 import { Variant } from "./Variant"
 
 test("seedで使用するID 0の商品を生成できる", () => {
-  const product = new Product(0, "商品", null, "", "/product.png")
+  const product = new Product(0, "商品", null, "PERMANENT", "", "/product.png")
 
   assert.equal(product.id, 0)
   assert.equal(product.category, null)
+  assert.equal(product.salesType, "PERMANENT")
   assert.equal(product.description, "")
 })
 
@@ -24,7 +25,7 @@ test("seedで使用するID 0のユーザーを生成できる", () => {
 
 test("負のIDは拒否する", () => {
   assert.throws(
-    () => new Product(-1, "商品", null, "", "/product.png"),
+    () => new Product(-1, "商品", null, "PERMANENT", "", "/product.png"),
     /id must be non-negative/
   )
 })
@@ -53,8 +54,8 @@ test("関連IDが負の場合は拒否する", () => {
 })
 
 test("必須文字列が空の場合は拒否する", () => {
-  assert.throws(() => new Product(0, "", null, "", "/product.png"), /name is required/)
-  assert.throws(() => new Product(0, "商品", null, "", ""), /thumbnailImageUrl is required/)
+  assert.throws(() => new Product(0, "", null, "PERMANENT", "", "/product.png"), /name is required/)
+  assert.throws(() => new Product(0, "商品", null, "PERMANENT", "", ""), /thumbnailImageUrl is required/)
   assert.throws(() => new User(0, "", "Yamada"), /firstName is required/)
   assert.throws(() => new User(0, "Taro", ""), /lastName is required/)
   assert.throws(() => new Variant(0, "", 0, 500, 50, "/variant.png"), /name is required/)
