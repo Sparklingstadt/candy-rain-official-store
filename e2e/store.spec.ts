@@ -63,9 +63,11 @@ test("サインインして商品を購入できる", async ({ page }) => {
 
   await page.getByRole("link", { name: "カート(1)" }).click()
   await expect(page.getByText("¥1,500", { exact: true })).toBeVisible()
-  await page.getByRole("button", { name: "購入", exact: true }).click()
+  await page.getByRole("button", { name: "注文を確定する", exact: true }).click()
 
-  await expect(page).toHaveURL(/\/orders$/)
+  await expect(page).toHaveURL(/\/orders\/\d+\?placed=1$/)
+  await expect(page.getByRole("status")).toContainText("ご注文ありがとうございます")
+  await page.getByRole("link", { name: "注文一覧へ戻る" }).click()
   await expect(page.getByRole("heading", { name: "注文履歴" })).toBeVisible()
   await expect(page.getByRole("cell", { name: "¥1,500" })).toBeVisible()
   const orderTable = page.getByRole("table")
@@ -84,10 +86,10 @@ test("在庫不足を表示し、購入を再試行できる状態に戻す", as
 
   try {
     await page.getByRole("link", { name: "カート(1)" }).click()
-    await page.getByRole("button", { name: "購入", exact: true }).click()
+    await page.getByRole("button", { name: "注文を確定する", exact: true }).click()
 
     await expect(page.locator('p[role="alert"]')).toContainText("在庫が不足しています")
-    await expect(page.getByRole("button", { name: "購入", exact: true })).toBeEnabled()
+    await expect(page.getByRole("button", { name: "注文を確定する", exact: true })).toBeEnabled()
     await expect(page).toHaveURL(/\/cart$/)
   } finally {
     await database.query('UPDATE "Variant" SET stock = 50 WHERE id = $1', [0])

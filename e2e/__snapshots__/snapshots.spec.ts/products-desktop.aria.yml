@@ -1,6 +1,6 @@
 - main:
   - text: Collection
-  - heading "Products" [level=1]
+  - heading "商品一覧" [level=1]
   - paragraph: 毎日に小さな彩りを添える、Candy Rain Storeのオリジナルグッズ。
   - navigation "販売区分で絞り込み":
     - list:

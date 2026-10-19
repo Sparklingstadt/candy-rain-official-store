@@ -18,7 +18,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ a
 
   return (
     <div className="space-y-10">
-      <PageHeader eyebrow="Collection" title="Products" description="毎日に小さな彩りを添える、Candy Rain Storeのオリジナルグッズ。" />
+      <PageHeader eyebrow="Collection" title="商品一覧" description="毎日に小さな彩りを添える、Candy Rain Storeのオリジナルグッズ。" />
       {!shopify && <SalesTypeFilter current={salesType} />}
       <Suspense key={salesType ?? "all"} fallback={<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{[1,2,3].map(i => <Skeleton key={i} className="aspect-[4/5]" />)}</div>}>
         {shopify ? <ShopifyCatalog after={after} /> : <ProductList productsPromise={products!} filtered={salesType !== null} />}

@@ -16,18 +16,6 @@ export function CartItemRow({ cartItem }: { cartItem: CartItemWithVariant }) {
         <Button
           type="submit"
           name="type"
-          value="increment"
-          disabled={isPending || cartItem.quantity >= MAX_CART_QUANTITY || reachedStockLimit}
-          variant="ghost"
-          size="icon-sm"
-        >
-          <Plus />
-          <span className="sr-only">数量を増やす</span>
-        </Button>
-        <p className="flex h-7 w-9 items-center justify-center text-sm font-medium">{cartItem.quantity}</p>
-        <Button
-          type="submit"
-          name="type"
           value="decrement"
           disabled={isPending || cartItem.quantity <= 1}
           variant="ghost"
@@ -35,6 +23,18 @@ export function CartItemRow({ cartItem }: { cartItem: CartItemWithVariant }) {
         >
           <Minus />
           <span className="sr-only">数量を減らす</span>
+        </Button>
+        <p className="flex h-7 w-9 items-center justify-center text-sm font-medium">{cartItem.quantity}</p>
+        <Button
+          type="submit"
+          name="type"
+          value="increment"
+          disabled={isPending || cartItem.quantity >= MAX_CART_QUANTITY || reachedStockLimit}
+          variant="ghost"
+          size="icon-sm"
+        >
+          <Plus />
+          <span className="sr-only">数量を増やす</span>
         </Button>
       </form>
       {reachedStockLimit ? (

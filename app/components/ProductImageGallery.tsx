@@ -7,19 +7,24 @@ import { candyToneClasses, type CandyTone } from "@/lib/candy"
 
 export type GalleryImage = { src: string; alt: string }
 
-export default function ProductImageGallery({ images, initialSrc, tone = "lemon" }: {
+export default function ProductImageGallery({ images, initialSrc, selectedSrc: controlledSrc, onSelectedSrcChange, tone = "lemon" }: {
   images: GalleryImage[]
   initialSrc?: string
+  // Pass both to let a parent (e.g. the variant picker) drive the main image.
+  selectedSrc?: string
+  onSelectedSrcChange?: (src: string) => void
   tone?: CandyTone
 }) {
   const surface = candyToneClasses[tone].surface
   const uniqueImages = images.filter((image, index) => images.findIndex(item => item.src === image.src) === index)
-  const [selectedSrc, setSelectedSrc] = useState(initialSrc ?? uniqueImages[0]?.src)
+  const [uncontrolledSrc, setUncontrolledSrc] = useState(initialSrc ?? uniqueImages[0]?.src)
+  const selectedSrc = controlledSrc ?? uncontrolledSrc
+  const setSelectedSrc = onSelectedSrcChange ?? setUncontrolledSrc
   const selected = uniqueImages.find(image => image.src === selectedSrc) ?? uniqueImages[0]
 
   return (
     <section aria-label="商品画像" className="min-w-0 space-y-4">
-      <div className={cn("relative aspect-[8/7] overflow-hidden", surface)}>
+      <div className={cn("relative aspect-square overflow-hidden", surface)}>
         {selected ? <Image src={selected.src} alt={selected.alt} fill className="object-contain" sizes="(max-width: 1024px) 100vw, 60vw" loading="eager" /> : <span className="flex h-full items-center justify-center text-muted-foreground">画像準備中</span>}
       </div>
       {uniqueImages.length > 1 && <div aria-label="画像を選択" className="grid grid-cols-3 gap-3 sm:grid-cols-4">

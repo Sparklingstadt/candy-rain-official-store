@@ -1,12 +1,14 @@
 - main:
   - text: TS Member
   - heading "Test Shopper" [level=1]
-  - paragraph: Candy Rain Store account
-  - button "Sign out"
+  - paragraph: Candy Rain Store のアカウント
+  - button "サインアウト"
   - heading "注文履歴" [level=2]
   - paragraph: 最近の注文と配送状況
   - paragraph: 注文はまだありません
   - paragraph: 最初の商品を選んでみましょう。
+  - link "商品を見る":
+    - /url: /products
   - text: お届け先住所 デモ用に登録された住所
   - paragraph: Test Shopper
   - paragraph: /\d+-\d+/
