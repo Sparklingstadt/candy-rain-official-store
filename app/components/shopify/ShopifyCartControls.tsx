@@ -19,7 +19,7 @@ export default function ShopifyCartControls({ lines, subtotal }: { lines: Shopif
     <div className="space-y-4">
       {lines.map((line, index) => <article key={line.id} className="flex gap-4 border bg-card p-4 sm:gap-5">
         <div className={cn("relative size-20 shrink-0 overflow-hidden sm:size-24", candyToneClasses[candyToneAt(index + 1)].surface)}>
-          {line.merchandise.image && <Image src={line.merchandise.image.url} alt="" fill sizes="96px" className="object-cover" />}
+          {line.merchandise.image && <Image src={line.merchandise.image.url} alt="" fill sizes="96px" className="object-cover grayscale" />}
         </div>
         <div className="min-w-0 flex-1 space-y-3">
           <div className="flex items-start justify-between gap-4">

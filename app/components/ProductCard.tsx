@@ -19,7 +19,7 @@ export default function ProductCard({ product, tone, headingLevel = "h2", sizes 
       <div className="flex h-full flex-col border bg-card p-2 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-primary/10">
         <div className={cn("relative aspect-square overflow-hidden", candyToneClasses[tone].surface)}>
           {product.image
-            ? <Image src={product.image.src} alt={product.image.alt} fill sizes={sizes} className="object-cover transition duration-500 group-hover:scale-105" />
+            ? <Image src={product.image.src} alt={product.image.alt} fill sizes={sizes} className="object-cover grayscale transition duration-500 group-hover:scale-105" />
             : <span className="flex h-full items-center justify-center text-sm text-muted-foreground">画像準備中</span>}
           <span className="absolute left-3 top-3 bg-card/90 px-2.5 py-1 text-xs font-medium">{product.category}</span>
           {product.soldOut && <>

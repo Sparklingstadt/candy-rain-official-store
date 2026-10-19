@@ -38,7 +38,7 @@ function CollageTile({ product, tone, className }: { product?: ProductSummary; t
   return (
     <div className={cn("relative overflow-hidden", candyToneClasses[tone].surface, className)}>
       {product?.image
-        ? <Image src={product.image.src} alt="" fill sizes="(max-width: 1024px) 50vw, 280px" className="object-cover" loading="eager" />
+        ? <Image src={product.image.src} alt="" fill sizes="(max-width: 1024px) 50vw, 280px" className="object-cover grayscale" loading="eager" />
         : <span className={cn("absolute left-1/2 top-1/2 size-1/3 -translate-1/2 opacity-70", candyToneClasses[tone].strong)} />}
       {product && <span className="absolute bottom-3 left-3 right-3 w-fit max-w-[calc(100%-1.5rem)] bg-card/90 px-3 py-2 text-xs">
         <span className="block truncate font-medium">{product.name}</span>
