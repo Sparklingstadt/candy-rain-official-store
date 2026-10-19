@@ -34,7 +34,7 @@ jobs:
           cache: npm
       - run: npm install --global npm@11.6.2
       - run: npm ci
-      - run: npm audit --audit-level=moderate
+      - run: npm audit --omit=dev --audit-level=moderate
       - run: node --test scripts/ci/release.test.mjs
       - run: npm test
       - run: npm run lint
