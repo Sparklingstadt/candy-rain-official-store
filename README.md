@@ -144,7 +144,7 @@ DB 統合・E2E テストには migration と seed を適用した専用のロ�
 
 | ジョブ | 検証内容 |
 | --- | --- |
-| `verify` | npm audit（moderate 以上で失敗）、単体テスト、lint、Prisma・Next.js の型生成と TypeScript チェック、本番ビルド |
+| `verify` | 本番依存の npm audit（moderate 以上で失敗）、単体テスト、lint、Prisma・Next.js の型生成と TypeScript チェック、本番ビルド |
 | `e2e` | 一時的な PostgreSQL 18 に schema 検証・migration・seed を適用し、DB 統合テストと DB デモの Playwright テスト |
 | `shopify` | Shopify モードの本番ビルドと、モック Storefront API を使った Playwright テスト |
 | `CI passed` | 上記3ジョブがすべて成功したことを確認（失敗・キャンセル・スキップは不合格） |
