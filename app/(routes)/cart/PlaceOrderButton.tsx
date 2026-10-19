@@ -18,7 +18,7 @@ export default function PlaceOrderButton(){
         setErrorMessage(result.message)
         return
       }
-      router.push("/orders")
+      router.push(`/orders/${result.orderId}?placed=1`)
     } catch {
       setErrorMessage("注文を確定できませんでした。時間をおいてもう一度お試しください。")
     } finally {
@@ -33,7 +33,8 @@ export default function PlaceOrderButton(){
         className="h-11 w-full"
         disabled={isPending}
         onClick={handlePlaceOrder}
-      >{isPending ? <LoaderCircle className="animate-spin" /> : <ArrowRight />}購入</Button>
+      >{isPending ? <LoaderCircle className="animate-spin" /> : <ArrowRight />}注文を確定する</Button>
+      <p className="text-center text-xs text-muted-foreground">ボタンを押すと注文が確定します（デモのため決済は発生しません）</p>
       {errorMessage && (
         <p role="alert" className="text-sm text-destructive">
           {errorMessage}

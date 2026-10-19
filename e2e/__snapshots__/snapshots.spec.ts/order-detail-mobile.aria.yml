@@ -1,8 +1,8 @@
 - main:
   - link "注文一覧へ戻る":
     - /url: /orders
-  - paragraph: /1\/1\/\d+, 9:\d+:\d+ AM/
-  - 'heading /Order #\d+/ [level=1]'
+  - paragraph: /\d+年1月1日 9:\d+/
+  - 'heading /注文 #\d+/ [level=1]'
   - text: 支払い待ち 未発送
   - paragraph: ランダム缶バッジ
   - paragraph: /¥\d+ × 1/

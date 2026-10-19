@@ -24,7 +24,7 @@ export default async function Page() {
   return (
     <div className="space-y-10">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4"><Avatar size="lg" className="ring-4 ring-candy-lavender"><AvatarFallback className="bg-candy-lavender text-candy-lavender-foreground">{user?.firstName?.[0]}{user?.lastName?.[0]}</AvatarFallback></Avatar><div><CandyPill tone="lavender">Member</CandyPill><h1 className="mt-2 text-3xl font-semibold tracking-tight">{user?.firstName} {user?.lastName}</h1><p className="text-sm text-muted-foreground">Candy Rain Store account</p></div></div>
+        <div className="flex items-center gap-4"><Avatar size="lg" className="ring-4 ring-candy-lavender"><AvatarFallback className="bg-candy-lavender text-candy-lavender-foreground">{user?.firstName?.[0]}{user?.lastName?.[0]}</AvatarFallback></Avatar><div><CandyPill tone="lavender">Member</CandyPill><h1 className="mt-2 text-3xl font-semibold tracking-tight">{user?.firstName} {user?.lastName}</h1><p className="text-sm text-muted-foreground">Candy Rain Store のアカウント</p></div></div>
         <SignOut />
       </div>
       <section className="space-y-4"><div><h2 className="text-2xl font-semibold">注文履歴</h2><p className="mt-1 text-sm text-muted-foreground">最近の注文と配送状況</p></div><OrderHistory orders={orders} /></section>

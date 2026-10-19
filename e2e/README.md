@@ -41,5 +41,5 @@ npx playwright test e2e/snapshots.spec.ts
 
 基準は `e2e/__snapshots__/snapshots.spec.ts/` にあります。
 OS 共通の ARIA スナップショットを使うため、macOS と Linux CI で同じ基準を比較できます。
-Playwright が生成する数値の正規表現は可変値を許容します。注文詳細の見出しは、更新後も `- 'heading /Order #\d+/ [level=1]'` として注文IDだけを可変にしてください（`#` を含むため YAML の引用符が必要です）。購入金額や数量は機能テストで具体値を検証します。
+Playwright が生成する数値の正規表現は可変値を許容します。注文詳細の見出しは、更新後も `- 'heading /注文 #\d+/ [level=1]'` として注文IDだけを可変にしてください（`#` を含むため YAML の引用符が必要です）。購入金額や数量は機能テストで具体値を検証します。
 失敗時は `test-results/` のスクリーンショットとエラーコンテキスト、CI リトライ時は trace で調査できます。

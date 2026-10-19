@@ -16,9 +16,9 @@ import {
 import StoreLogo from "./StoreLogo"
 
 const navigation = [
-  { href: "/products", label: "Products" },
-  { href: "/orders", label: "Orders" },
-  { href: "/account", label: "Account" },
+  { href: "/products", label: "商品一覧" },
+  { href: "/orders", label: "注文履歴" },
+  { href: "/account", label: "アカウント" },
 ]
 
 function isActive(pathname: string, href: string) {

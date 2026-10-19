@@ -26,7 +26,7 @@ export const test = base.extend<{ shopper: Shopper; database: pg.Pool }>({
         await page.getByLabel("Password", { exact: true }).fill("demo-password")
         await page.getByRole("button", { name: "Sign In", exact: true }).click()
         await expect(page).toHaveURL(/\/products$/)
-        await expect(page.getByRole("heading", { name: "Products", exact: true })).toBeVisible()
+        await expect(page.getByRole("heading", { name: "商品一覧", exact: true })).toBeVisible()
       } })
     } finally {
       // Restore only stock purchased by this fixture; leave other shoppers' data intact.

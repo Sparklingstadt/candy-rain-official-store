@@ -9,7 +9,7 @@ for (const viewport of [
   test.describe(`ページスナップショット / ${viewport.name} (#12)`, () => {
     test.use({ viewport: { width: viewport.width, height: viewport.height } })
     for (const route of [
-      { name: "products", path: "/products", ready: "Products" },
+      { name: "products", path: "/products", ready: "商品一覧" },
       { name: "product", path: "/products/1", ready: "クリアファイル" },
       { name: "cart", path: "/cart", ready: "買い物かご" },
       { name: "orders", path: "/orders", ready: "注文履歴" },
@@ -35,21 +35,21 @@ for (const viewport of [
       await page.getByRole("button", { name: "カートに追加" }).click()
       await expect(page.getByRole("link", { name: "カート(1)" })).toBeVisible()
       await page.goto("/cart")
-      await page.getByRole("button", { name: "購入", exact: true }).click()
-      await expect(page).toHaveURL(/\/orders$/)
+      await page.getByRole("button", { name: "注文を確定する", exact: true }).click()
+      await expect(page).toHaveURL(/\/orders\/\d+\?placed=1$/)
       const result = await database.query<{ id: number }>(
         `UPDATE "Order" SET "orderedAt" = '2026-01-01T00:00:00Z' WHERE "userId" = $1 RETURNING id`,
         [shopper.id],
       )
       await page.goto(`/orders/${result.rows[0].id}`)
-      await expect(page.getByRole("heading", { name: /^Order #\d+$/ })).toBeVisible()
+      await expect(page.getByRole("heading", { name: /^注文 #\d+$/ })).toBeVisible()
       await expect(page.getByRole("main")).toMatchAriaSnapshot({ name: `order-detail-${viewport.name}.aria.yml` })
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
     })
     test("signout", async ({ page, shopper }) => {
       await shopper.signIn(page)
       await page.goto("/account")
-      await page.getByRole("button", { name: "Sign out", exact: true }).click()
+      await page.getByRole("button", { name: "サインアウト", exact: true }).click()
       await expect(page.getByRole("heading", { name: "サインアウトしました" })).toBeVisible()
       await expect(page.getByRole("main")).toMatchAriaSnapshot({ name: `signout-${viewport.name}.aria.yml` })
     })

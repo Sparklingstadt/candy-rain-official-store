@@ -17,7 +17,7 @@ export default function SignOut() {
 
   return (
     <Button type="button" variant="outline" onClick={handleSignOut} disabled={isPending}>
-      <LogOut /> Sign out
+      <LogOut /> サインアウト
     </Button>
   )
 }

@@ -35,7 +35,7 @@ export default async function RootLayout({
     if(!cart) throw new Error("Cart not found")
     const repo = new cartItemRepository()
     const cartItems = await repo.findManyByCartId(cart.id)
-    cartItemCount = cartItems.length
+    cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0)
   }
 
   return (
