@@ -14,7 +14,7 @@ function CartItemProduct({ cartItem, detail }: { cartItem: CartItemWithVariant; 
   return (
     <div className="flex min-w-0 items-center gap-3">
       <span className="relative size-14 shrink-0 overflow-hidden bg-candy-lemon">
-        <Image src={getVariantImageUrl(cartItem.variant)} alt="" fill className="object-cover" sizes="56px" />
+        <Image src={getVariantImageUrl(cartItem.variant)} alt="" fill className="object-cover grayscale" sizes="56px" />
       </span>
       <div className="min-w-0">
         <Link href={`/products/${cartItem.variant.productId}`} className="font-medium underline-offset-4 hover:underline">{cartItem.variant.name}</Link>
