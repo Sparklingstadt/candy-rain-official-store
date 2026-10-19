@@ -11,7 +11,7 @@ export function CartItemRow({ cartItem }: { cartItem: CartItemWithVariant }) {
 
   return (
     <div className="space-y-1">
-      <form action={formAction} className="flex w-fit items-center rounded-lg border bg-background p-0.5">
+      <form action={formAction} className="flex w-fit items-center border bg-background p-0.5">
         <input type="hidden" name="cartItemId" value={cartItem.id} />
         <Button
           type="submit"

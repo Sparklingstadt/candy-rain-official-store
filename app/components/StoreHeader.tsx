@@ -27,7 +27,7 @@ function isActive(pathname: string, href: string) {
 
 function CartCount({ count }: { count: number }) {
   return (
-    <span aria-hidden="true" className={cn("flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold", count > 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+    <span aria-hidden="true" className={cn("flex h-5 min-w-5 items-center justify-center px-1.5 text-[11px] font-bold", count > 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
       {count}
     </span>
   )
@@ -40,7 +40,7 @@ export default function StoreHeader({ cartItemCount, signedIn }: { cartItemCount
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur-xl">
       <div className="page-shell flex h-16 items-center justify-between">
-        <Link href="/" className="rounded-full focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+        <Link href="/" className="focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
           <StoreLogo />
         </Link>
 
@@ -52,7 +52,7 @@ export default function StoreHeader({ cartItemCount, signedIn }: { cartItemCount
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={cn(buttonVariants({ variant: "ghost" }), "rounded-full px-3.5", active ? "bg-muted font-semibold text-foreground" : "text-muted-foreground")}
+                className={cn(buttonVariants({ variant: "ghost" }), "px-3.5", active ? "bg-muted font-semibold text-foreground" : "text-muted-foreground")}
               >
                 {item.label}
               </Link>
@@ -62,13 +62,13 @@ export default function StoreHeader({ cartItemCount, signedIn }: { cartItemCount
             href="/cart"
             aria-label={cartLabel}
             aria-current={isActive(pathname, "/cart") ? "page" : undefined}
-            className={cn(buttonVariants({ variant: "outline" }), "ml-2 gap-2 rounded-full bg-card pr-1.5 pl-3.5")}
+            className={cn(buttonVariants({ variant: "outline" }), "ml-2 gap-2 bg-card pr-1.5 pl-3.5")}
           >
             <ShoppingBag data-icon="inline-start" />
             カート
             <CartCount count={cartItemCount} />
           </Link>
-          <a href="https://github.com/Sparklingstadt/prd-candy-rain-store" target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "rounded-full text-muted-foreground")}>
+          <a href="https://github.com/Sparklingstadt/prd-candy-rain-store" target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "text-muted-foreground")}>
             <Code2 />
             <span className="sr-only">GitHub</span>
           </a>
@@ -78,7 +78,7 @@ export default function StoreHeader({ cartItemCount, signedIn }: { cartItemCount
           <Link
             href="/cart"
             aria-label={cartLabel}
-            className={cn(buttonVariants({ variant: "outline" }), "gap-1.5 rounded-full bg-card pr-1.5 pl-2.5")}
+            className={cn(buttonVariants({ variant: "outline" }), "gap-1.5 bg-card pr-1.5 pl-2.5")}
           >
             <ShoppingBag />
             <CartCount count={cartItemCount} />

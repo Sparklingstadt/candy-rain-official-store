@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 function CartItemProduct({ cartItem, detail }: { cartItem: CartItemWithVariant; detail?: React.ReactNode }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <span className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-candy-lemon">
+      <span className="relative size-14 shrink-0 overflow-hidden bg-candy-lemon">
         <Image src={getVariantImageUrl(cartItem.variant)} alt="" fill className="object-cover" sizes="56px" />
       </span>
       <div className="min-w-0">

@@ -40,9 +40,9 @@ export default async function RootLayout({
 
   return (
     <html lang="ja" className={cn("font-sans", geist.variable)}>
-      <body>
+      <body className="flex flex-col">
         <StoreHeader cartItemCount={cartItemCount} signedIn={Boolean(session?.user)} />
-        <main className="page-shell py-8 sm:py-12">
+        <main className="page-shell flex-1 py-8 sm:py-12">
           {children}
         </main>
         <StoreFooter shopify={shopify} />

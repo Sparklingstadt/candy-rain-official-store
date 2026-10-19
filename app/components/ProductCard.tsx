@@ -13,23 +13,23 @@ export default function ProductCard({ product, tone, headingLevel = "h2", sizes 
 }) {
   const Heading = headingLevel
   return (
-    <Link href={product.href} className="group block h-full rounded-3xl focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
-      <div className="flex h-full flex-col rounded-3xl border bg-card p-2 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-primary/10">
-        <div className={cn("relative aspect-square overflow-hidden rounded-2xl", candyToneClasses[tone].surface)}>
+    <Link href={product.href} className="group block h-full focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+      <div className="flex h-full flex-col border bg-card p-2 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-primary/10">
+        <div className={cn("relative aspect-square overflow-hidden", candyToneClasses[tone].surface)}>
           {product.image
             ? <Image src={product.image.src} alt={product.image.alt} fill sizes={sizes} className="object-cover transition duration-500 group-hover:scale-105" />
             : <span className="flex h-full items-center justify-center text-sm text-muted-foreground">画像準備中</span>}
-          <span className="absolute left-3 top-3 rounded-full bg-card/90 px-2.5 py-1 text-xs font-medium">{product.category}</span>
+          <span className="absolute left-3 top-3 bg-card/90 px-2.5 py-1 text-xs font-medium">{product.category}</span>
           {product.soldOut && <>
             <span aria-hidden="true" className="absolute inset-0 bg-card/45" />
-            <span className="absolute right-3 top-3 rounded-full bg-foreground px-2.5 py-1 text-xs font-medium text-background">売り切れ</span>
+            <span className="absolute right-3 top-3 bg-foreground px-2.5 py-1 text-xs font-medium text-background">売り切れ</span>
           </>}
         </div>
         <div className="flex flex-1 flex-col gap-3 px-2 pb-2 pt-4">
           <Heading className="font-medium leading-6">{product.name}</Heading>
           <div className="mt-auto flex items-center justify-between gap-3">
             <p className={cn("font-semibold", product.soldOut ? "text-muted-foreground" : "text-primary")}>{product.price}</p>
-            <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full border transition group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
+            <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center border transition group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
               <ArrowRight className="size-4" />
             </span>
           </div>
