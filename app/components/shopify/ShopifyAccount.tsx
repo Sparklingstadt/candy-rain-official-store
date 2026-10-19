@@ -22,13 +22,13 @@ export default function ShopifyAccount() {
       actions={<a href={customerAccountUrl()} className={buttonVariants({ size: "lg", className: "h-11 px-5" })}>アカウント画面へ <ExternalLink /></a>}
     />
     <section aria-label="アカウントの管理" className="grid gap-4 md:grid-cols-3 md:gap-6">
-      {sections.map(({ href, title, description, label, Icon, tone }) => <div key={href} className="flex flex-col gap-3 rounded-3xl border bg-card p-6 sm:p-7">
-        <span className={cn("flex size-11 items-center justify-center rounded-full [&>svg]:size-5", candyToneClasses[tone].surface, candyToneClasses[tone].text)}><Icon aria-hidden="true" /></span>
+      {sections.map(({ href, title, description, label, Icon, tone }) => <div key={href} className="flex flex-col gap-3 border bg-card p-6 sm:p-7">
+        <span className={cn("flex size-11 items-center justify-center [&>svg]:size-5", candyToneClasses[tone].surface, candyToneClasses[tone].text)}><Icon aria-hidden="true" /></span>
         <h2 className="text-lg font-semibold">{title}</h2>
         <p className="flex-1 text-sm leading-7 text-muted-foreground">{description}</p>
         <Link href={href} className={buttonVariants({ variant: "outline", className: "w-fit bg-card" })}>{label} <ArrowRight /></Link>
       </div>)}
     </section>
-    <p className="flex items-start gap-2.5 rounded-2xl bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground"><Info aria-hidden="true" className="mt-1 size-4 shrink-0 text-candy-lavender-foreground" />住所の変更は次回のお買い物に使用されます。注文済みのお届け先変更は、注文履歴からストアへお問い合わせください。</p>
+    <p className="flex items-start gap-2.5 bg-muted px-4 py-3 text-sm leading-6 text-muted-foreground"><Info aria-hidden="true" className="mt-1 size-4 shrink-0 text-candy-lavender-foreground" />住所の変更は次回のお買い物に使用されます。注文済みのお届け先変更は、注文履歴からストアへお問い合わせください。</p>
   </div>
 }

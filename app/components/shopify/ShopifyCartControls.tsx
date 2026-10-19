@@ -17,8 +17,8 @@ export default function ShopifyCartControls({ lines, subtotal }: { lines: Shopif
   const busy = pending || checkingOut
   return <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
     <div className="space-y-4">
-      {lines.map((line, index) => <article key={line.id} className="flex gap-4 rounded-3xl border bg-card p-4 sm:gap-5">
-        <div className={cn("relative size-20 shrink-0 overflow-hidden rounded-2xl sm:size-24", candyToneClasses[candyToneAt(index + 1)].surface)}>
+      {lines.map((line, index) => <article key={line.id} className="flex gap-4 border bg-card p-4 sm:gap-5">
+        <div className={cn("relative size-20 shrink-0 overflow-hidden sm:size-24", candyToneClasses[candyToneAt(index + 1)].surface)}>
           {line.merchandise.image && <Image src={line.merchandise.image.url} alt="" fill sizes="96px" className="object-cover" />}
         </div>
         <div className="min-w-0 flex-1 space-y-3">
@@ -33,19 +33,19 @@ export default function ShopifyCartControls({ lines, subtotal }: { lines: Shopif
           {!line.merchandise.availableForSale && <p role="alert" className="text-sm text-destructive">この商品は現在購入できません。カートから削除してください。</p>}
           <form action={action} className="flex flex-wrap items-end gap-2">
             <input type="hidden" name="lineId" value={line.id} />
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">数量<Input key={line.quantity} name="quantity" type="number" min="1" max="99" step="1" defaultValue={line.quantity} required className="h-9 w-20 rounded-xl bg-background text-foreground" disabled={busy} /></label>
-            <Button type="submit" name="operation" value="update" disabled={busy} variant="outline" className="h-9 rounded-xl">更新</Button>
-            <Button type="submit" name="operation" value="remove" disabled={busy} formNoValidate variant="ghost" className="h-9 rounded-xl text-muted-foreground">削除</Button>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">数量<Input key={line.quantity} name="quantity" type="number" min="1" max="99" step="1" defaultValue={line.quantity} required className="h-9 w-20 bg-background text-foreground" disabled={busy} /></label>
+            <Button type="submit" name="operation" value="update" disabled={busy} variant="outline" className="h-9">更新</Button>
+            <Button type="submit" name="operation" value="remove" disabled={busy} formNoValidate variant="ghost" className="h-9 text-muted-foreground">削除</Button>
           </form>
         </div>
       </article>)}
       {state && <p role={state.success ? "status" : "alert"} className={state.success ? "text-sm text-candy-mint-foreground" : "text-sm text-destructive"}>{state.message}</p>}
     </div>
-    <div className="h-fit space-y-5 rounded-[1.75rem] border bg-card p-6 shadow-xl shadow-primary/5 sm:p-7 lg:sticky lg:top-24">
+    <div className="h-fit space-y-5 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-7 lg:sticky lg:top-24">
       <h2 className="text-xl font-semibold">ご注文内容</h2>
       <div className="flex items-end justify-between"><span className="font-medium">小計</span><span className="text-2xl font-semibold text-primary">{money(subtotal)}</span></div>
       <p className="text-sm text-muted-foreground">送料・税金・割引を含む最終金額は購入手続きで確認できます。</p>
-      <section aria-label="配送先とお支払い" className="space-y-3 rounded-2xl bg-muted p-4 text-sm">
+      <section aria-label="配送先とお支払い" className="space-y-3 bg-muted p-4 text-sm">
         <h3 className="font-semibold">配送先・お支払い方法を選択</h3>
         <p className="leading-6 text-muted-foreground">次のShopify購入画面でお届け先を入力できます。ログインすると登録済みの住所から選択できます。</p>
         <Link href="/account/address" className="inline-block font-medium text-primary underline-offset-4 hover:underline">登録済みの住所を管理</Link>

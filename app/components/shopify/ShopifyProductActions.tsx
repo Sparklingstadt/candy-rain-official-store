@@ -23,7 +23,7 @@ export default function ShopifyProductActions({ product }: { product: ShopifyPro
       ...product.variants.nodes.flatMap(v => v.image ? [{ src: v.image.url, alt: v.image.altText || `${product.title} ${v.title}` }] : []),
     ]} />
     <div className="lg:sticky lg:top-24 lg:self-start">
-      <div className="space-y-6 rounded-[1.75rem] border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
+      <div className="space-y-6 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
         <div className="space-y-4">
           {product.productType && <CandyPill tone="lemon">{product.productType}</CandyPill>}
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.title}</h1>
@@ -33,13 +33,13 @@ export default function ShopifyProductActions({ product }: { product: ShopifyPro
         <form action={action} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="shopify-variant" className="text-muted-foreground">バリエーション</Label>
-            <select id="shopify-variant" name="variantId" value={id || ""} onChange={event => setId(event.target.value)} disabled={pending || !variant} className="h-11 w-full rounded-xl border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
+            <select id="shopify-variant" name="variantId" value={id || ""} onChange={event => setId(event.target.value)} disabled={pending || !variant} className="h-11 w-full border bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
               {product.variants.nodes.map(v => <option key={v.id} value={v.id} disabled={!v.availableForSale}>{v.title === "Default Title" ? product.title : v.title}{!v.availableForSale ? "（売り切れ）" : ""}</option>)}
             </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="shopify-quantity" className="text-muted-foreground">数量</Label>
-            <Input id="shopify-quantity" name="quantity" type="number" min="1" max="99" step="1" defaultValue="1" required disabled={pending || !variant?.availableForSale} className="h-11 rounded-xl bg-background" />
+            <Input id="shopify-quantity" name="quantity" type="number" min="1" max="99" step="1" defaultValue="1" required disabled={pending || !variant?.availableForSale} className="h-11 bg-background" />
           </div>
           <Button type="submit" className="h-11 w-full" size="lg" disabled={pending || !variant?.availableForSale}><ShoppingBag data-icon="inline-start" />{pending ? "追加中…" : variant?.availableForSale ? "カートに追加" : "売り切れ"}</Button>
           {state && <p role={state.success ? "status" : "alert"} className={state.success ? "text-sm text-candy-mint-foreground" : "text-sm text-destructive"}>{state.message}</p>}

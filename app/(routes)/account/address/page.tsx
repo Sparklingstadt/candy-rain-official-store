@@ -11,7 +11,7 @@ export default function Page(){
     <div className="mx-auto max-w-2xl space-y-8">
       <Link href="/account" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="size-4" /> アカウントへ戻る</Link>
       <PageHeader eyebrow="Address book" tone="mint" title="設定住所" />
-      <Card className="rounded-3xl"><CardHeader><span className="flex size-11 items-center justify-center rounded-full bg-candy-mint text-candy-mint-foreground"><MapPin className="size-5" /></span><CardTitle>既定のお届け先</CardTitle></CardHeader><CardContent className="space-y-1 leading-7"><p className="font-medium">FIRSTN LASTN</p><p className="text-muted-foreground">000-0000</p><p className="text-muted-foreground">XX県 YY市 ZZ丁目</p><p className="text-muted-foreground">A-B-C号室</p></CardContent></Card>
+      <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-mint text-candy-mint-foreground"><MapPin className="size-5" /></span><CardTitle>既定のお届け先</CardTitle></CardHeader><CardContent className="space-y-1 leading-7"><p className="font-medium">FIRSTN LASTN</p><p className="text-muted-foreground">000-0000</p><p className="text-muted-foreground">XX県 YY市 ZZ丁目</p><p className="text-muted-foreground">A-B-C号室</p></CardContent></Card>
     </div>
   )
 }

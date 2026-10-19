@@ -32,7 +32,7 @@ export default async function Page({
       <Link href="/orders" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="size-4" /> 注文一覧へ戻る</Link>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm text-muted-foreground">{order.orderedAt.toLocaleString()}</p><h1 className="mt-2 text-4xl font-semibold tracking-tight">Order #{orderId}</h1></div><div className="flex gap-2"><Badge variant="secondary">{order.paymentStatus}</Badge><Badge variant="outline">{order.shippingStatus}</Badge></div></div>
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-      <Card className="hidden h-fit rounded-3xl py-0 md:flex"><Table><TableHeader><TableRow><TableHead className="p-4">商品名</TableHead><TableHead>価格</TableHead><TableHead>数量</TableHead><TableHead className="text-right">合計</TableHead></TableRow></TableHeader><TableBody>
+      <Card className="hidden h-fit py-0 md:flex"><Table><TableHeader><TableRow><TableHead className="p-4">商品名</TableHead><TableHead>価格</TableHead><TableHead>数量</TableHead><TableHead className="text-right">合計</TableHead></TableRow></TableHeader><TableBody>
           { orderItems.map(item => (
             <TableRow key={item.variantId}><TableCell className="p-4 font-medium">{item.variantName}</TableCell><TableCell>¥{item.priceAtPurchase.toLocaleString()}</TableCell><TableCell>{item.quantity}</TableCell><TableCell className="text-right font-semibold">¥{(item.quantity * item.priceAtPurchase).toLocaleString()}</TableCell></TableRow>
           ))}
@@ -50,7 +50,7 @@ export default async function Page({
           </Card>
         ))}
       </div>
-      <Card className="h-fit rounded-[1.75rem] shadow-xl shadow-primary/5"><CardHeader><CardTitle>お支払い内容</CardTitle></CardHeader><CardContent className="space-y-4"><div className="flex justify-between text-sm"><p>小計(税込)</p><p>¥{subTotalPrice.toLocaleString()}</p></div><div className="flex justify-between text-sm"><p>送料(税込)</p><p>¥{order.shippingPrice.toLocaleString()}</p></div><Separator /><div className="flex items-end justify-between"><p className="font-medium">合計</p><p className="text-2xl font-semibold text-primary">¥{order.totalPrice.toLocaleString()}</p></div></CardContent></Card>
+      <Card className="h-fit shadow-xl shadow-primary/5"><CardHeader><CardTitle>お支払い内容</CardTitle></CardHeader><CardContent className="space-y-4"><div className="flex justify-between text-sm"><p>小計(税込)</p><p>¥{subTotalPrice.toLocaleString()}</p></div><div className="flex justify-between text-sm"><p>送料(税込)</p><p>¥{order.shippingPrice.toLocaleString()}</p></div><Separator /><div className="flex items-end justify-between"><p className="font-medium">合計</p><p className="text-2xl font-semibold text-primary">¥{order.totalPrice.toLocaleString()}</p></div></CardContent></Card>
       </div>
     </div>
   )
