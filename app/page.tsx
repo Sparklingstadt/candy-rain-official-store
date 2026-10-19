@@ -36,11 +36,11 @@ const demoFeatures = [
 
 function CollageTile({ product, tone, className }: { product?: ProductSummary; tone: CandyTone; className: string }) {
   return (
-    <div className={cn("relative overflow-hidden rounded-[1.75rem]", candyToneClasses[tone].surface, className)}>
+    <div className={cn("relative overflow-hidden", candyToneClasses[tone].surface, className)}>
       {product?.image
         ? <Image src={product.image.src} alt="" fill sizes="(max-width: 1024px) 50vw, 280px" className="object-cover" loading="eager" />
-        : <span className={cn("absolute left-1/2 top-1/2 size-1/3 -translate-1/2 rounded-full opacity-70", candyToneClasses[tone].strong)} />}
-      {product && <span className="absolute bottom-3 left-3 right-3 w-fit max-w-[calc(100%-1.5rem)] rounded-xl bg-card/90 px-3 py-2 text-xs">
+        : <span className={cn("absolute left-1/2 top-1/2 size-1/3 -translate-1/2 opacity-70", candyToneClasses[tone].strong)} />}
+      {product && <span className="absolute bottom-3 left-3 right-3 w-fit max-w-[calc(100%-1.5rem)] bg-card/90 px-3 py-2 text-xs">
         <span className="block truncate font-medium">{product.name}</span>
         <span className="block font-semibold text-primary">{product.price}</span>
       </span>}
@@ -73,21 +73,21 @@ export default async function Page(){
           </div>
           <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
             {perks.map((perk, index) => (
-              <li key={perk} className="flex items-center gap-2"><span aria-hidden="true" className={cn("size-2 rounded-full", candyToneClasses[candyToneAt(index + 1)].strong)} />{perk}</li>
+              <li key={perk} className="flex items-center gap-2"><span aria-hidden="true" className={cn("size-2", candyToneClasses[candyToneAt(index + 1)].strong)} />{perk}</li>
             ))}
           </ul>
         </div>
 
         <div aria-hidden="true" className="relative">
-          <span className="absolute -left-3 top-2 size-4 rounded-full bg-candy-pink-strong" />
-          <span className="absolute -top-2 right-1/2 size-3 rounded-full bg-candy-lemon-strong" />
-          <span className="absolute -right-2 top-1/2 size-5 rounded-full bg-candy-mint-strong" />
-          <span className="absolute -bottom-2 left-1/2 size-2.5 rounded-full bg-candy-lavender-strong" />
+          <span className="absolute -left-3 top-2 size-4 bg-candy-pink-strong" />
+          <span className="absolute -top-2 right-1/2 size-3 bg-candy-lemon-strong" />
+          <span className="absolute -right-2 top-1/2 size-5 bg-candy-mint-strong" />
+          <span className="absolute -bottom-2 left-1/2 size-2.5 bg-candy-lavender-strong" />
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-4 pt-6">
               <CollageTile product={pickup[0]} tone="pink" className="aspect-[3/4]" />
-              <div className="hidden rounded-[1.75rem] bg-candy-lavender p-6 sm:block">
-                <span className="flex gap-1.5"><span className="size-2.5 rounded-full bg-candy-pink-strong" /><span className="size-2.5 rounded-full bg-candy-mint-strong" /><span className="size-2.5 rounded-full bg-candy-lemon-strong" /></span>
+              <div className="hidden bg-candy-lavender p-6 sm:block">
+                <span className="flex gap-1.5"><span className="size-2.5 bg-candy-pink-strong" /><span className="size-2.5 bg-candy-mint-strong" /><span className="size-2.5 bg-candy-lemon-strong" /></span>
                 <p className="mt-3 text-xl font-semibold leading-snug text-candy-lavender-foreground">毎日に、<br />小さな彩りを。</p>
               </div>
             </div>
@@ -116,8 +116,8 @@ export default async function Page(){
         {features.map(({ title, description, Icon }, index) => {
           const tone = candyToneClasses[candyToneAt(index)]
           return (
-            <div key={title} className="space-y-3 rounded-3xl border bg-card p-6 sm:p-7">
-              <span className={cn("flex size-11 items-center justify-center rounded-full [&>svg]:size-5", tone.surface, tone.text)}><Icon aria-hidden="true" /></span>
+            <div key={title} className="space-y-3 border bg-card p-6 sm:p-7">
+              <span className={cn("flex size-11 items-center justify-center [&>svg]:size-5", tone.surface, tone.text)}><Icon aria-hidden="true" /></span>
               <h2 className="text-lg font-semibold">{title}</h2>
               <p className="text-sm leading-7 text-muted-foreground">{description}</p>
             </div>

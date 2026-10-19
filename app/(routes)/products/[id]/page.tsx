@@ -36,7 +36,7 @@ export default async function Page({ params }: {
       <div className="grid gap-10 lg:grid-cols-[1.2fr_.8fr] lg:gap-12">
         <ProductImageView product={product} variants={variants} />
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="space-y-6 rounded-[1.75rem] border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
+          <div className="space-y-6 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-8">
             <div className="space-y-4">
               <CandyPill tone="lemon">{product.category || "カテゴリー指定なし"}</CandyPill>
               <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.name}</h1>

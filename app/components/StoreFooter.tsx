@@ -30,10 +30,10 @@ export default function StoreFooter({ shopify }: { shopify: boolean }) {
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <p>© 2026 Candy Rain Store</p>
           <span aria-hidden="true" className="flex gap-1.5">
-            <span className="size-1.5 rounded-full bg-candy-pink-strong" />
-            <span className="size-1.5 rounded-full bg-candy-mint-strong" />
-            <span className="size-1.5 rounded-full bg-candy-lemon-strong" />
-            <span className="size-1.5 rounded-full bg-candy-lavender-strong" />
+            <span className="size-1.5 bg-candy-pink-strong" />
+            <span className="size-1.5 bg-candy-mint-strong" />
+            <span className="size-1.5 bg-candy-lemon-strong" />
+            <span className="size-1.5 bg-candy-lavender-strong" />
           </span>
         </div>
       </div>

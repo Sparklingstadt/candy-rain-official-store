@@ -16,7 +16,7 @@ export default function ShopifyAccountManagement({ section }: { section: keyof t
   return <div className="mx-auto max-w-2xl space-y-8">
     <Link href="/account" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="size-4" /> アカウントへ戻る</Link>
     <PageHeader eyebrow="Account" tone="lavender" title={details?.title ?? "お支払い方法"} />
-    <Card className="rounded-3xl"><CardHeader><CardTitle>{payment ? "購入手続きで選択" : "登録情報の管理"}</CardTitle></CardHeader><CardContent className="space-y-5">
+    <Card className=""><CardHeader><CardTitle>{payment ? "購入手続きで選択" : "登録情報の管理"}</CardTitle></CardHeader><CardContent className="space-y-5">
       {details ? <>
         <p>{details.description}</p>
         <ol className="list-decimal space-y-3 pl-5 marker:font-semibold marker:text-primary">{details.steps.map(step => <li key={step}>{step}</li>)}</ol>

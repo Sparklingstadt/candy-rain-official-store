@@ -15,10 +15,10 @@ export const demoAssurances = [
 
 export default function PurchaseAssurance({ items }: { items: string[] }) {
   return (
-    <ul aria-label="ご購入について" className="space-y-2.5 rounded-2xl bg-muted p-4 text-sm">
+    <ul aria-label="ご購入について" className="space-y-2.5 bg-muted p-4 text-sm">
       {items.map((item, index) => (
         <li key={item} className="flex items-center gap-2.5">
-          <span aria-hidden="true" className={cn("size-2 shrink-0 rounded-full", candyToneClasses[candyToneAt(index)].strong)} />
+          <span aria-hidden="true" className={cn("size-2 shrink-0", candyToneClasses[candyToneAt(index)].strong)} />
           {item}
         </li>
       ))}

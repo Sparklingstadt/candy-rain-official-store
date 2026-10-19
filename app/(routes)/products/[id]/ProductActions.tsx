@@ -22,7 +22,7 @@ export function ProductActions({ variants }: { variants: Variant[]}) {
             type="button"
             key={v.id}
             disabled={v.stock <= 0}
-            className={cn("flex items-center justify-between rounded-xl border bg-card px-4 py-3 text-left text-sm transition hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-60", variantId === v.id && "border-primary bg-primary/5 ring-1 ring-primary")}
+            className={cn("flex items-center justify-between border bg-card px-4 py-3 text-left text-sm transition hover:border-primary/50 disabled:cursor-not-allowed disabled:opacity-60", variantId === v.id && "border-primary bg-primary/5 ring-1 ring-primary")}
             onClick={() => setVariantId(v.id)}
           >
             <span className="flex items-center gap-2">{variantId === v.id && <Check className="size-4 text-primary" />}{ v.name }</span>

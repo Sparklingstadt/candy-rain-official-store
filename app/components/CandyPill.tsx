@@ -8,8 +8,8 @@ export default function CandyPill({ tone = "pink", className, children }: {
 }) {
   const classes = candyToneClasses[tone]
   return (
-    <span className={cn("inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium", classes.surface, classes.text, className)}>
-      <span aria-hidden="true" className={cn("size-1.5 rounded-full", classes.strong)} />
+    <span className={cn("inline-flex w-fit items-center gap-1.5 px-2.5 py-1 text-xs font-medium", classes.surface, classes.text, className)}>
+      <span aria-hidden="true" className={cn("size-1.5", classes.strong)} />
       {children}
     </span>
   )

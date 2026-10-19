@@ -6,7 +6,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
   const hasCredentialsError = (await searchParams).error === "credentials"
 
   return (
-    <Card className="rounded-[1.75rem] shadow-xl shadow-primary/5">
+    <Card className="shadow-xl shadow-primary/5">
       <CardHeader className="space-y-3">
         <CandyPill>Demo account</CandyPill>
         <CardTitle className="text-2xl">おかえりなさい</CardTitle>
@@ -14,12 +14,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
       </CardHeader>
       <CardContent className="space-y-6">
         {hasCredentialsError && (
-          <p role="alert" className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          <p role="alert" className="border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
             メールアドレスまたはパスワードが正しくありません。
           </p>
         )}
         <SignInForm />
-        <div className="rounded-xl bg-muted p-4 text-sm">
+        <div className="bg-muted p-4 text-sm">
           <p className="font-medium">入力例</p>
           <p className="mt-2 text-muted-foreground">Email: user1@mail.com</p>
           <p className="text-muted-foreground">Password: demo-password</p>
