@@ -4,6 +4,7 @@ import { Variant } from "@/lib/types";
 import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { formatPrice } from "@/lib/format"
 
 export function ProductActions({ variants, variantId, onVariantChange }: {
   variants: Variant[]
@@ -29,7 +30,7 @@ export function ProductActions({ variants, variantId, onVariantChange }: {
             <span className="flex items-center gap-2">{variantId === v.id && <Check className="size-4 text-primary" />}{ v.name }</span>
             <div className="flex items-center gap-2">
               {v.stock <= 0 ? <Badge variant="destructive">売り切れ</Badge> : null}
-              <span className="font-semibold">¥{ v.price.toLocaleString() }</span>
+              <span className="font-semibold">{formatPrice(v.price)}</span>
             </div>
           </button>
         ))}

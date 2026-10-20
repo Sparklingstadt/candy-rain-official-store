@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { calculateOrderTotal } from "./orderPricing"
+import { calculateCartSubtotal, calculateOrderTotal, calculateSubtotal } from "./orderPricing"
 
 test("送料を含めた注文合計を計算する", () => {
   const items = [
@@ -19,4 +19,13 @@ test("送料無料の場合は商品小計を返す", () => {
   const items = [{ quantity: 3, variant: { price: 500 } }]
 
   assert.equal(calculateOrderTotal(items, 0), 1500)
+})
+
+test("単価と数量から小計を計算する", () => {
+  assert.equal(calculateSubtotal([{ price: 500, quantity: 2 }, { price: 800, quantity: 1 }]), 1800)
+  assert.equal(calculateSubtotal([]), 0)
+})
+
+test("カート商品の小計はバリエーション価格から計算する", () => {
+  assert.equal(calculateCartSubtotal([{ quantity: 3, variant: { price: 500 } }]), 1500)
 })

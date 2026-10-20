@@ -4,8 +4,9 @@ import PlaceOrderButton from "./PlaceOrderButton"
 import { requireUserId } from "@/lib/auth"
 import { getCartByUserId, getCartItemsWithVariantsByCartId } from "@/services/storeQueryService"
 import { CartSummary } from "./CartSummary"
-import { cartItemRepository } from "@/repositories/implementations/cartItemRepository"
-import { cartRepository } from "@/repositories/implementations/cartRepository"
+import { calculateCartSubtotal, SHIPPING_PRICE } from "@/services/checkout/orderPricing"
+import { CartItemRepository } from "@/repositories/implementations/cartItemRepository"
+import { CartRepository } from "@/repositories/implementations/cartRepository"
 import { ArrowRight, ChevronLeft, ShoppingBag } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import EmptyState from "@/app/components/EmptyState"
@@ -13,13 +14,13 @@ import PageHeader from "@/app/components/PageHeader"
 
 export default async function Page(){
   const userId = await requireUserId()
-  const cartRepo = new cartRepository()
+  const cartRepo = new CartRepository()
   const cart = await getCartByUserId(cartRepo, userId)
   if(!cart) throw new Error("Cart not found")
-  const repo = new cartItemRepository()
+  const repo = new CartItemRepository()
   const cartItems = await getCartItemsWithVariantsByCartId(repo, cart.id)
-  const subTotalPrice = cartItems.reduce((acc, item) => acc + (item.quantity * item.variant.price), 0)
-  const totalPrice = subTotalPrice + 1000
+  const subTotalPrice = calculateCartSubtotal(cartItems)
+  const totalPrice = subTotalPrice + SHIPPING_PRICE
 
   return (
     <div className="space-y-8">
@@ -32,7 +33,7 @@ export default async function Page(){
         : <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <CartItemTable cartItems={cartItems} />
           <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-            <CartSummary subTotalPrice={subTotalPrice} shippingFee={1000} totalPrice={totalPrice} />
+            <CartSummary subTotalPrice={subTotalPrice} shippingPrice={SHIPPING_PRICE} totalPrice={totalPrice} />
             <PlaceOrderButton />
           </div>
         </div>}

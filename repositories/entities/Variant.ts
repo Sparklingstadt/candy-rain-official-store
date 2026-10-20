@@ -19,8 +19,8 @@ export class Variant {
     if(!price) {
       throw new Error("price is required!")
     }
-    if(!stock) {
-      throw new Error("stock is required!")
+    if(!Number.isInteger(stock) || stock < 0) {
+      throw new Error("stock must be a non-negative integer!")
     }
     if(!imageUrl) {
       throw new Error("imageUrl is required!")

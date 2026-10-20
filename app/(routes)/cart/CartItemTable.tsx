@@ -1,8 +1,9 @@
 "use client"
-import { removeCartItem } from "@/app/actions/actions"
+import { removeCartItemAction } from "@/app/actions/removeCartItemAction"
 import Image from "next/image"
 import Link from "next/link"
 import { getVariantImageUrl } from "@/lib/product-images"
+import { formatPrice } from "@/lib/format"
 import { CartItemRow } from "./CartItemRow"
 import { CartItemWithVariant } from "@/lib/types"
 import { Trash2 } from "lucide-react"
@@ -26,9 +27,9 @@ function CartItemProduct({ cartItem, detail }: { cartItem: CartItemWithVariant; 
 
 export default function CartItemTable({ cartItems }: { cartItems: CartItemWithVariant[] }) {
   const handleRemoveCartItem = async (variantId: number) => {
-    await removeCartItem({ variantId })
+    await removeCartItemAction({ variantId })
   }
-  
+
   return (
     <>
       <Card className="hidden py-0 md:block">
@@ -38,10 +39,10 @@ export default function CartItemTable({ cartItems }: { cartItems: CartItemWithVa
             {cartItems.map(cartItem => (
               <TableRow key={cartItem.variantId}>
                 <TableCell className="p-4"><CartItemProduct cartItem={cartItem} /></TableCell>
-                <TableCell>¥{cartItem.variant.price.toLocaleString()}</TableCell>
+                <TableCell>{formatPrice(cartItem.variant.price)}</TableCell>
                 <TableCell><CartItemRow cartItem={cartItem} /></TableCell>
                 <TableCell><Button variant="ghost" size="icon" onClick={() => handleRemoveCartItem(cartItem.variant.id)}><Trash2 /><span className="sr-only">削除</span></Button></TableCell>
-                <TableCell className="text-right font-semibold">¥{(cartItem.quantity * cartItem.variant.price).toLocaleString()}</TableCell>
+                <TableCell className="text-right font-semibold">{formatPrice(cartItem.quantity * cartItem.variant.price)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -51,8 +52,8 @@ export default function CartItemTable({ cartItems }: { cartItems: CartItemWithVa
         {cartItems.map(cartItem => (
           <Card key={cartItem.variantId}>
             <CardContent className="space-y-4">
-              <div className="flex items-start justify-between gap-4"><CartItemProduct cartItem={cartItem} detail={<p className="mt-1 text-sm text-muted-foreground">¥{cartItem.variant.price.toLocaleString()} / 個</p>} /><Button variant="ghost" size="icon" onClick={() => handleRemoveCartItem(cartItem.variant.id)}><Trash2 /><span className="sr-only">削除</span></Button></div>
-              <div className="flex items-center justify-between"><CartItemRow cartItem={cartItem} /><p className="font-semibold">¥{(cartItem.quantity * cartItem.variant.price).toLocaleString()}</p></div>
+              <div className="flex items-start justify-between gap-4"><CartItemProduct cartItem={cartItem} detail={<p className="mt-1 text-sm text-muted-foreground">{formatPrice(cartItem.variant.price)} / 個</p>} /><Button variant="ghost" size="icon" onClick={() => handleRemoveCartItem(cartItem.variant.id)}><Trash2 /><span className="sr-only">削除</span></Button></div>
+              <div className="flex items-center justify-between"><CartItemRow cartItem={cartItem} /><p className="font-semibold">{formatPrice(cartItem.quantity * cartItem.variant.price)}</p></div>
             </CardContent>
           </Card>
         ))}

@@ -26,6 +26,7 @@ export type CartItemWithVariant = {
   variant: Variant,
 }
 
-export type Result<T, E> =
-  | { ok: true, data: T }
-  | { ok: false, error: E }
+// Return shape shared by Server Actions; expected failures carry a message for the UI.
+export type ActionResult<T = object> =
+  | ({ success: true } & T)
+  | { success: false, message: string }

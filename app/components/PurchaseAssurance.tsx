@@ -1,10 +1,12 @@
 import { candyToneAt, candyToneClasses } from "@/lib/candy"
+import { formatPrice } from "@/lib/format"
+import { SHIPPING_PRICE } from "@/services/checkout/orderPricing"
 import { cn } from "@/lib/utils"
 
 export const demoAssurances = [
   "デモストアのため実際の決済は発生しません",
   "在庫は注文確定時にあらためて確認します",
-  "デモ送料は一律 ¥1,000 です",
+  `デモ送料は一律 ${formatPrice(SHIPPING_PRICE)} です`,
 ]
 
 export default function PurchaseAssurance({ items }: { items: string[] }) {

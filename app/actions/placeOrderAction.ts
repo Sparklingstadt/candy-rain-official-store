@@ -1,21 +1,22 @@
 "use server"
-
 import { requireUserId } from "@/lib/auth"
-import checkoutService, { CheckoutError } from "@/services/checkout/checkoutService"
+import type { ActionResult } from "@/lib/types"
+import { CheckoutError, createOrderFromCart } from "@/services/checkout/checkoutService"
+import { revalidatePath } from "next/cache"
 
-export type PlaceOrderResult =
-  | { success: true; orderId: number }
-  | { success: false; message: string }
-
-export async function placeOrderAction(): Promise<PlaceOrderResult> {
+export async function placeOrderAction(): Promise<ActionResult<{ orderId: number }>> {
   const userId = await requireUserId()
+
+  let orderId: number
   try {
-    const order = await checkoutService(userId)
-    return { success: true, orderId: order.id }
+    orderId = (await createOrderFromCart(userId)).id
   } catch (error) {
     if (error instanceof CheckoutError) {
       return { success: false, message: error.message }
     }
     throw error
   }
+
+  revalidatePath("/", "layout")
+  return { success: true, orderId }
 }

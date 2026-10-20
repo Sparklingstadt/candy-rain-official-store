@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { Order } from "@/repositories/entities/Order"
-import { formatOrderDateTime } from "@/lib/format"
+import { formatOrderDateTime, formatPrice } from "@/lib/format"
 
 export default function OrderHistory({ orders }: { orders: Order[] }) {
   if (orders.length === 0) {
@@ -27,7 +27,7 @@ export default function OrderHistory({ orders }: { orders: Order[] }) {
               <TableCell className="text-muted-foreground">{formatOrderDateTime(order.orderedAt)}</TableCell>
               <TableCell><Badge variant="secondary">{order.paymentStatus}</Badge></TableCell>
               <TableCell><Badge variant="outline">{order.shippingStatus}</Badge></TableCell>
-              <TableCell className="text-right font-semibold">¥{order.totalPrice.toLocaleString()}</TableCell>
+              <TableCell className="text-right font-semibold">{formatPrice(order.totalPrice)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -43,7 +43,7 @@ export default function OrderHistory({ orders }: { orders: Order[] }) {
                     <p className="font-semibold text-primary">注文 #{order.id}</p>
                     <p className="mt-1 text-xs text-muted-foreground">{formatOrderDateTime(order.orderedAt)}</p>
                   </div>
-                  <p className="shrink-0 font-semibold">¥{order.totalPrice.toLocaleString()}</p>
+                  <p className="shrink-0 font-semibold">{formatPrice(order.totalPrice)}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">{order.paymentStatus}</Badge>

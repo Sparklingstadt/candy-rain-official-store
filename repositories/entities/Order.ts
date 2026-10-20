@@ -17,8 +17,8 @@ export class Order {
     if(!shippingStatus) {
       throw new Error("shippingStatus is required!")
     }
-    if(!shippingPrice) {
-      throw new Error("shippingPrice is required!")
+    if(!Number.isInteger(shippingPrice) || shippingPrice < 0) {
+      throw new Error("shippingPrice must be a non-negative integer!")
     }
     if(!totalPrice) {
       throw new Error("totalPrice is required!")

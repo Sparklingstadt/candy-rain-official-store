@@ -74,3 +74,21 @@ test("注文ステータスが空の場合は拒否する", () => {
   assert.throws(() => new Order(0, "", "発送済み", 1000, 1500, orderedAt, 0), /paymentStatus is required/)
   assert.throws(() => new Order(0, "支払い済み", "", 1000, 1500, orderedAt, 0), /shippingStatus is required/)
 })
+
+test("在庫0のバリエーションと送料無料の注文を生成できる", () => {
+  const orderedAt = new Date("2026-01-01T00:00:00.000Z")
+
+  assert.equal(new Variant(0, "売り切れ", 0, 500, 0, "/variant.png").stock, 0)
+  assert.equal(new Order(0, "支払い済み", "発送済み", 0, 1500, orderedAt, 0).shippingPrice, 0)
+})
+
+test("在庫や送料が負の場合は拒否する", () => {
+  const orderedAt = new Date("2026-01-01T00:00:00.000Z")
+
+  assert.throws(() => new Variant(0, "商品", 0, 500, -1, "/variant.png"), /stock must be a non-negative integer/)
+  assert.throws(() => new Order(0, "支払い済み", "発送済み", -1, 1500, orderedAt, 0), /shippingPrice must be a non-negative integer/)
+})
+
+test("バリエーション名が空の注文明細は拒否する", () => {
+  assert.throws(() => new OrderItem(0, 0, 0, "", 500, 1), /variantName is required/)
+})
