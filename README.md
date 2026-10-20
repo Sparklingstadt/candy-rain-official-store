@@ -66,7 +66,7 @@ Prisma → PostgreSQL
 
 ## ローカル開発
 
-Node.js 24 と npm 11.6.2 を使用します（CI と同じ構成）。
+Node.js 26 と npm 11.6.2 を使用します（CI と同じ構成）。
 
 ```bash
 git clone https://github.com/Sparklingstadt/prd-candy-rain-store.git
