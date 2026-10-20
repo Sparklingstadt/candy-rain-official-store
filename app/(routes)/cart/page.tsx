@@ -1,5 +1,3 @@
-import { isShopifyEnabled } from "@/lib/shopify/config"
-import ShopifyCartPage from "@/app/components/shopify/ShopifyCartPage"
 import Link from "next/link"
 import CartItemTable from "./CartItemTable"
 import PlaceOrderButton from "./PlaceOrderButton"
@@ -14,7 +12,6 @@ import EmptyState from "@/app/components/EmptyState"
 import PageHeader from "@/app/components/PageHeader"
 
 export default async function Page(){
-  if (isShopifyEnabled()) return <ShopifyCartPage />
   const userId = await requireUserId()
   const cartRepo = new cartRepository()
   const cart = await getCartByUserId(cartRepo, userId)

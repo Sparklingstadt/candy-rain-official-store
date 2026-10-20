@@ -26,7 +26,6 @@ export default defineConfig({
     command: "npm run build && npm start -- --hostname 127.0.0.1 --port 3118",
     url: "http://127.0.0.1:3118/signin",
     env: {
-      COMMERCE_PROVIDER: "local",
       TZ: "Asia/Tokyo",
       AUTH_TRUST_HOST: "true",
       AUTH_URL: "http://127.0.0.1:3118",

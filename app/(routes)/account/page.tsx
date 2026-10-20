@@ -1,5 +1,3 @@
-import { isShopifyEnabled } from "@/lib/shopify/config"
-import ShopifyAccount from "@/app/components/shopify/ShopifyAccount"
 import SignOut from "./SignOut";
 import { requireUserId } from "@/lib/auth";
 import { getOrders, getUserByUserId } from "@/services/storeQueryService";
@@ -14,7 +12,6 @@ import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function Page() {
-  if (isShopifyEnabled()) return <ShopifyAccount />
   const userId = await requireUserId()
   const repo = new OrderRepository()
   const orders = await getOrders(repo, userId)

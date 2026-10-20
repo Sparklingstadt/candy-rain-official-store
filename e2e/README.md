@@ -13,9 +13,7 @@ npm run test:e2e
 ```
 
 Playwright が production build を作成し、`http://127.0.0.1:3118` でテスト専用サーバーを起動します。
-既存サーバーは再利用せず、`COMMERCE_PROVIDER=local` に固定します。
-Shopify のテストは従来どおり `npm run test:shopify` で実行します。
-3107番ポートが使用中の場合は `SHOPIFY_E2E_PORT=3119 npm run test:shopify` のように切り替えられます。
+既存サーバーは再利用しません。
 
 ## 対象
 

@@ -1,5 +1,3 @@
-import { isShopifyEnabled } from "@/lib/shopify/config"
-import ShopifyProductDetail from "@/app/components/shopify/ShopifyProductDetail"
 import { getProductById, getVariantsByProductId } from "@/services/storeQueryService"
 import ProductDetailView from "./ProductDetailView"
 import { requireUserId } from "@/lib/auth"
@@ -15,11 +13,6 @@ export default async function Page({ params }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  if (isShopifyEnabled()) {
-    let handle: string
-    try { handle = decodeURIComponent(id) } catch { notFound() }
-    return <ShopifyProductDetail handle={handle} />
-  }
   const productId = toNonNegativeInteger(id)
   if (productId === null) notFound()
   await requireUserId()

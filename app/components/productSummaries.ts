@@ -1,32 +1,17 @@
 import { getProductImageUrl } from "@/lib/product-images"
 import type { SalesType } from "@/lib/salesTypes"
-import { money, type ShopifyProduct } from "@/lib/shopify/types"
 import type { Product, Variant } from "@/lib/types"
 
-// Display-only shape shared by the demo and Shopify catalogs.
+// Display-only shape shared by the product list and the home page pickup.
 export type ProductSummary = {
   key: string
   href: string
   name: string
   category: string
-  // Only the demo catalog tracks sales types; Shopify products have none.
-  salesType: SalesType | null
+  salesType: SalesType
   price: string
   image: { src: string; alt: string } | null
   soldOut: boolean
-}
-
-export function fromShopifyProduct(product: ShopifyProduct): ProductSummary {
-  return {
-    key: product.id,
-    href: `/products/${encodeURIComponent(product.handle)}`,
-    name: product.title,
-    category: product.productType || "グッズ",
-    salesType: null,
-    price: `${money(product.priceRange.minVariantPrice)}〜`,
-    image: product.featuredImage ? { src: product.featuredImage.url, alt: product.featuredImage.altText || product.title } : null,
-    soldOut: !product.availableForSale,
-  }
 }
 
 export function fromDemoProduct(product: Product & { variants: Variant[] }): ProductSummary {
