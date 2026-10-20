@@ -28,7 +28,7 @@ export default function ProductCard({ product, tone, headingLevel = "h2", sizes 
           </>}
         </div>
         <div className="flex flex-1 flex-col gap-3 px-2 pb-2 pt-4">
-          {product.salesType && <CandyPill tone={salesTypeMeta[product.salesType].tone}>{salesTypeMeta[product.salesType].label}</CandyPill>}
+          <CandyPill tone={salesTypeMeta[product.salesType].tone}>{salesTypeMeta[product.salesType].label}</CandyPill>
           <Heading className="font-medium leading-6">{product.name}</Heading>
           <div className="mt-auto flex items-center justify-between gap-3">
             <p className={cn("font-semibold", product.soldOut ? "text-muted-foreground" : "text-primary")}>{product.price}</p>

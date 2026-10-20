@@ -15,12 +15,11 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
-    "test": "tsx --test lib/format.test.mts services/checkout/orderPricing.test.mts repositories/entities/entities.test.mts lib/validation.test.mts lib/salesTypes.test.mts lib/shopify/validation.test.mts lib/product-images.test.mts lib/shopify/account.test.mts",
+    "test": "tsx --test lib/format.test.mts services/checkout/orderPricing.test.mts repositories/entities/entities.test.mts lib/validation.test.mts lib/salesTypes.test.mts lib/product-images.test.mts",
     "test:integration": "tsx --test tests/integration/checkout.test.mts",
     "test:e2e": "tsx prisma/reset-e2e.ts && playwright test",
     "test:e2e:ui": "tsx prisma/reset-e2e.ts && playwright test --ui",
-    "env:check": "node scripts/check-docker-env.mjs",
-    "test:shopify": "playwright test --config playwright.shopify.config.ts"
+    "env:check": "node scripts/check-docker-env.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

@@ -6,7 +6,7 @@ const columns = [
   { title: "Account", links: [{ href: "/account", label: "アカウント" }, { href: "/orders", label: "注文履歴" }] },
 ]
 
-export default function StoreFooter({ shopify }: { shopify: boolean }) {
+export default function StoreFooter() {
   return (
     <footer className="mt-16 border-t bg-card/60">
       <div className="page-shell space-y-10 py-12">
@@ -14,7 +14,7 @@ export default function StoreFooter({ shopify }: { shopify: boolean }) {
           <div className="max-w-xs space-y-3">
             <StoreLogo />
             <p className="font-medium">小さなときめきを、ひと箱に。</p>
-            <p className="text-sm leading-6 text-muted-foreground">{shopify ? "毎日に小さな彩りを添える、オリジナルグッズのお店です。" : "正常系の購入体験を検証するデモストア"}</p>
+            <p className="text-sm leading-6 text-muted-foreground">正常系の購入体験を検証するデモストア</p>
           </div>
           <div className="flex gap-16">
             {columns.map(column => (

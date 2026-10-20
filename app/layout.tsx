@@ -1,5 +1,3 @@
-import { isShopifyEnabled } from "@/lib/shopify/config"
-import { getShopifyCart } from "@/lib/shopify/cart"
 import type { Metadata } from "next";
 import "./globals.css";
 import { getCartByUserId } from "@/services/storeQueryService";
@@ -23,12 +21,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const shopify = isShopifyEnabled()
-  const session = shopify ? null : await auth()
+  const session = await auth()
   let cartItemCount = 0
-  if (shopify) {
-    try { cartItemCount = (await getShopifyCart())?.totalQuantity ?? 0 } catch { /* Cart page provides a retry message. */ }
-  }
   if(session?.user){
     const cartRepo = new cartRepository()
     const cart = await getCartByUserId(cartRepo, parseInt(session.user.id))
@@ -45,7 +39,7 @@ export default async function RootLayout({
         <main className="page-shell flex-1 py-8 sm:py-12">
           {children}
         </main>
-        <StoreFooter shopify={shopify} />
+        <StoreFooter />
       </body>
     </html>
   );

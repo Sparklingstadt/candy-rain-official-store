@@ -1,12 +1,6 @@
 import { candyToneAt, candyToneClasses } from "@/lib/candy"
 import { cn } from "@/lib/utils"
 
-export const shopifyAssurances = [
-  "お支払いは Shopify Checkout で行います",
-  "在庫と価格は購入手続きの直前に再確認します",
-  "アカウントなしでもカートに追加できます",
-]
-
 export const demoAssurances = [
   "デモストアのため実際の決済は発生しません",
   "在庫は注文確定時にあらためて確認します",

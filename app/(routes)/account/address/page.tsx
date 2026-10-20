@@ -1,5 +1,3 @@
-import { isShopifyEnabled } from "@/lib/shopify/config"
-import ShopifyAccountManagement from "@/app/components/shopify/ShopifyAccountManagement"
 import Link from "next/link"
 import { ChevronLeft, MapPin } from "lucide-react"
 import PageHeader from "@/app/components/PageHeader"
@@ -9,7 +7,6 @@ import { getUserByUserId } from "@/services/storeQueryService"
 import { userRepository } from "@/repositories/implementations/userRepository"
 
 export default async function Page(){
-  if (isShopifyEnabled()) return <ShopifyAccountManagement section="addresses" />
   const userId = await requireUserId()
   const user = await getUserByUserId(new userRepository(), userId)
   return (
