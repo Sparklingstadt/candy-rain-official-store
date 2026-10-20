@@ -2,7 +2,7 @@ import { getProductsWithVariants } from "@/services/storeQueryService"
 import { ProductRepository } from "@/repositories/implementations/productRepository"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Boxes, ShieldCheck, Sparkles } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { candyToneAt, candyToneClasses, type CandyTone } from "@/lib/candy"
 import { cn } from "@/lib/utils"
@@ -20,12 +20,6 @@ async function getPickupProducts(): Promise<ProductSummary[]> {
 }
 
 const perks = ["Next.js × Prisma", "在庫をトランザクションで管理", "E2E で継続検証"]
-
-const features = [
-  { title: "フルスタック設計", description: "Next.js、Prisma、PostgreSQLで購入フローをレイヤーごとに実装しています。", Icon: Boxes },
-  { title: "自動品質確認", description: "単体・DB統合・Playwright E2EをGitHub Actionsで継続的に確認します。", Icon: ShieldCheck },
-  { title: "正常系に集中", description: "学習用デモとして、迷いのないシンプルな購入体験を優先しています。", Icon: Sparkles },
-]
 
 function CollageTile({ product, tone, className }: { product?: ProductSummary; tone: CandyTone; className: string }) {
   return (
@@ -99,19 +93,6 @@ export default async function Page(){
           {pickup.map((product, index) => <ProductCard key={product.key} product={product} tone={candyToneAt(index + 1)} headingLevel="h3" sizes="(max-width: 1024px) 50vw, 25vw" />)}
         </div>
       </section>}
-
-      <section aria-label="Candy Rain Storeの特長" className="grid gap-4 md:grid-cols-3 md:gap-6">
-        {features.map(({ title, description, Icon }, index) => {
-          const tone = candyToneClasses[candyToneAt(index)]
-          return (
-            <div key={title} className="space-y-3 border bg-card p-6 sm:p-7">
-              <span className={cn("flex size-11 items-center justify-center [&>svg]:size-5", tone.surface, tone.text)}><Icon aria-hidden="true" /></span>
-              <h2 className="text-lg font-semibold">{title}</h2>
-              <p className="text-sm leading-7 text-muted-foreground">{description}</p>
-            </div>
-          )
-        })}
-      </section>
     </div>
   )
 }
