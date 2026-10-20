@@ -17,7 +17,7 @@ export class OrderItem {
       throw new Error("variantId must be non-negative!")
     }
     if(!variantName) {
-      throw new Error("varintName is required!")
+      throw new Error("variantName is required!")
     }
     if(!priceAtPurchase) {
       throw new Error("priceAtPurchase is required!")

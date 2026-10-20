@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { ICartItemRepository } from "../interfaces/ICartItemRepository"
 import { MAX_CART_QUANTITY } from "@/lib/validation"
 
-export class cartItemRepository implements ICartItemRepository {
+export class CartItemRepository implements ICartItemRepository {
   async findManyByCartId(cartId: number) {
     return await prisma.cartItem.findMany({
       where: { cartId }

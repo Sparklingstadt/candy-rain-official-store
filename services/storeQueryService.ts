@@ -17,3 +17,5 @@ export const getOrderByOrderIdForUser = (repo: IOrderRepository, orderId: number
 export const getOrderItemsByOrderId = (repo: IOrderItemRepository, orderId: number) => repo.findManyByOrderId(orderId)
 export const getCartByUserId = (repo: ICartRepository, userId: number) => repo.findByUserId(userId)
 export const getCartItemsWithVariantsByCartId = (repo: ICartItemRepository, cartId: number) => repo.findManyWithVariantsByCartId(cartId)
+export const getCartItemCount = async (repo: ICartItemRepository, cartId: number) =>
+  (await repo.findManyByCartId(cartId)).reduce((total, item) => total + item.quantity, 0)

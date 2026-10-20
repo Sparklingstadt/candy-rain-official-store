@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { getCartByUserId } from "@/services/storeQueryService";
+import { getCartByUserId, getCartItemCount } from "@/services/storeQueryService";
 import { auth } from "@/auth";
-import { cartItemRepository } from "@/repositories/implementations/cartItemRepository";
-import { cartRepository } from "@/repositories/implementations/cartRepository";
+import { CartItemRepository } from "@/repositories/implementations/cartItemRepository";
+import { CartRepository } from "@/repositories/implementations/cartRepository";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import StoreHeader from "@/app/components/StoreHeader";
@@ -24,12 +24,9 @@ export default async function RootLayout({
   const session = await auth()
   let cartItemCount = 0
   if(session?.user){
-    const cartRepo = new cartRepository()
-    const cart = await getCartByUserId(cartRepo, parseInt(session.user.id))
+    const cart = await getCartByUserId(new CartRepository(), parseInt(session.user.id))
     if(!cart) throw new Error("Cart not found")
-    const repo = new cartItemRepository()
-    const cartItems = await repo.findManyByCartId(cart.id)
-    cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0)
+    cartItemCount = await getCartItemCount(new CartItemRepository(), cart.id)
   }
 
   return (

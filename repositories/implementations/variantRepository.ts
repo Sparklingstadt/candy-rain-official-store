@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { IVariantRepository } from "../interfaces/IVariantRepository"
 
-export class variantRepository implements IVariantRepository {
+export class VariantRepository implements IVariantRepository {
   async findById(variantId: number) {
     return await prisma.variant.findUnique({ where: { id: variantId } })
   }

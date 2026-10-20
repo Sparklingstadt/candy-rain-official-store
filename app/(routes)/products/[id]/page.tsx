@@ -2,7 +2,7 @@ import { getProductById, getVariantsByProductId } from "@/services/storeQuerySer
 import ProductDetailView from "./ProductDetailView"
 import { requireUserId } from "@/lib/auth"
 import { ProductRepository } from "@/repositories/implementations/productRepository"
-import { variantRepository } from "@/repositories/implementations/variantRepository"
+import { VariantRepository } from "@/repositories/implementations/variantRepository"
 import Breadcrumb from "@/app/components/Breadcrumb"
 import PurchaseAssurance, { demoAssurances } from "@/app/components/PurchaseAssurance"
 import { getProductImageUrl, getVariantImageUrl } from "@/lib/product-images"
@@ -19,7 +19,7 @@ export default async function Page({ params }: {
   const repo = new ProductRepository()
   const product = await getProductById(repo, productId)
   if(!product) notFound()
-  const variantRepo = new variantRepository()
+  const variantRepo = new VariantRepository()
   const variants = await getVariantsByProductId(variantRepo, product.id)
   const images = [
     { src: getProductImageUrl(product), alt: product.name },

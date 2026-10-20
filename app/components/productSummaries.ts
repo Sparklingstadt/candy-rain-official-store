@@ -1,3 +1,4 @@
+import { formatPrice } from "@/lib/format"
 import { getProductImageUrl } from "@/lib/product-images"
 import type { SalesType } from "@/lib/salesTypes"
 import type { Product, Variant } from "@/lib/types"
@@ -21,7 +22,7 @@ export function fromDemoProduct(product: Product & { variants: Variant[] }): Pro
     name: product.name,
     category: product.category || "グッズ",
     salesType: product.salesType,
-    price: `¥${Math.min(...product.variants.map(v => v.price)).toLocaleString()}〜`,
+    price: `${formatPrice(Math.min(...product.variants.map(v => v.price)))}〜`,
     image: { src: getProductImageUrl(product), alt: product.name },
     soldOut: product.variants.every(variant => variant.stock <= 0),
   }

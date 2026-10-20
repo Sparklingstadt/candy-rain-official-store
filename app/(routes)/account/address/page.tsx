@@ -4,11 +4,11 @@ import PageHeader from "@/app/components/PageHeader"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { requireUserId } from "@/lib/auth"
 import { getUserByUserId } from "@/services/storeQueryService"
-import { userRepository } from "@/repositories/implementations/userRepository"
+import { UserRepository } from "@/repositories/implementations/userRepository"
 
 export default async function Page(){
   const userId = await requireUserId()
-  const user = await getUserByUserId(new userRepository(), userId)
+  const user = await getUserByUserId(new UserRepository(), userId)
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <Link href="/account" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ChevronLeft className="size-4" /> アカウントへ戻る</Link>

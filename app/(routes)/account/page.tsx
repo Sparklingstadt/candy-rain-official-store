@@ -2,7 +2,7 @@ import SignOut from "./SignOut";
 import { requireUserId } from "@/lib/auth";
 import { getOrders, getUserByUserId } from "@/services/storeQueryService";
 import { OrderRepository } from "@/repositories/implementations/orderRepository";
-import { userRepository } from "@/repositories/implementations/userRepository";
+import { UserRepository } from "@/repositories/implementations/userRepository";
 import Link from "next/link";
 import { MapPin, Pencil, UserRound } from "lucide-react"
 import OrderHistory from "@/app/components/OrderHistory"
@@ -15,7 +15,7 @@ export default async function Page() {
   const userId = await requireUserId()
   const repo = new OrderRepository()
   const orders = await getOrders(repo, userId)
-  const userRepo = new userRepository()
+  const userRepo = new UserRepository()
   const user = await getUserByUserId(userRepo, userId)
 
   return (

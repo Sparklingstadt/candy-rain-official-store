@@ -1,6 +1,6 @@
-import { cartRepository } from "@/repositories/implementations/cartRepository"
-import { cartItemRepository } from "@/repositories/implementations/cartItemRepository"
-import { variantRepository } from "@/repositories/implementations/variantRepository"
+import { CartRepository } from "@/repositories/implementations/cartRepository"
+import { CartItemRepository } from "@/repositories/implementations/cartItemRepository"
+import { VariantRepository } from "@/repositories/implementations/variantRepository"
 
 export type CartErrorCode = "OUT_OF_STOCK" | "QUANTITY_UNAVAILABLE"
 
@@ -21,8 +21,8 @@ export async function addItemToCart({
   variantId: number
   quantity: number
 }) {
-  const cartRepo = new cartRepository()
-  const variantRepo = new variantRepository()
+  const cartRepo = new CartRepository()
+  const variantRepo = new VariantRepository()
   const [cart, variant] = await Promise.all([
     cartRepo.findByUserId(userId),
     variantRepo.findById(variantId),
@@ -32,12 +32,12 @@ export async function addItemToCart({
     throw new CartError("OUT_OF_STOCK", "選択した商品は売り切れです")
   }
 
-  const repo = new cartItemRepository()
+  const repo = new CartItemRepository()
   await repo.addToCart({ cartId: cart.id, variantId, quantity })
 }
 
 export async function removeItemFromCart(userId: number, variantId: number) {
-  const repo = new cartItemRepository()
+  const repo = new CartItemRepository()
   const count = await repo.removeCartItemForUser(userId, variantId)
   if (count !== 1) throw new Error("Cart item not found")
 }
@@ -47,7 +47,7 @@ export async function updateCartItemQuantity(
   cartItemId: number,
   type: "increment" | "decrement"
 ) {
-  const repo = new cartItemRepository()
+  const repo = new CartItemRepository()
 
   if (type === "increment") {
     const count = await repo.incrementQuantityForUser(cartItemId, userId)

@@ -5,6 +5,7 @@ import ProductImageGallery, { type GalleryImage } from "@/app/components/Product
 import CandyPill from "@/app/components/CandyPill"
 import { Variant } from "@/lib/types"
 import { salesTypeMeta, type SalesType } from "@/lib/salesTypes"
+import { formatPrice } from "@/lib/format"
 import { ProductActions } from "./ProductActions"
 
 export default function ProductDetailView({ product, images, variants, variantImages, children }: {
@@ -39,7 +40,7 @@ export default function ProductDetailView({ product, images, variants, variantIm
             </div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.name}</h1>
             <p className="text-2xl font-semibold text-primary">
-              ¥{selectedVariant.price.toLocaleString()}
+              {formatPrice(selectedVariant.price)}
               <span className="ml-2 text-sm font-medium text-muted-foreground">{selectedVariant.name}</span>
             </p>
             <p className="leading-7 text-muted-foreground">{product.description || "日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。"}</p>
