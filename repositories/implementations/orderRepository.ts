@@ -5,7 +5,8 @@ import { Order } from "../entities/Order"
 export class OrderRepository implements IOrderRepository {
   async findManyByUserId(userId: number) {
     const orders = await prisma.order.findMany({
-      where: { userId }
+      where: { userId },
+      orderBy: [{ orderedAt: "desc" }, { id: "desc" }],
     })
     return orders.map(order => {
       return new Order(

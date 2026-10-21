@@ -28,12 +28,18 @@ export async function addItemToCart({
     variantRepo.findById(variantId),
   ])
   if (!cart) throw new Error("Cart not found")
-  if (!variant || variant.stock < quantity) {
+  if (!variant || variant.stock <= 0) {
     throw new CartError("OUT_OF_STOCK", "選択した商品は売り切れです")
   }
 
   const repo = new CartItemRepository()
-  await repo.addToCart({ cartId: cart.id, variantId, quantity })
+  const cartItem = await repo.addToCart({ cartId: cart.id, variantId, quantity })
+  if (!cartItem) {
+    throw new CartError(
+      "QUANTITY_UNAVAILABLE",
+      "カートの数量と合わせて在庫数・上限（99個）を超えるため追加できません",
+    )
+  }
 }
 
 export async function removeItemFromCart(userId: number, variantId: number) {

@@ -1,8 +1,14 @@
+import type { Metadata } from "next"
 import { SignInForm } from "@/app/(routes)/signin/SignInForm"
 import CandyPill from "@/app/components/CandyPill"
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
+export const metadata: Metadata = { title: "サインイン" }
+
 export default async function Page({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  if ((await auth())?.user) redirect("/products")
   const hasCredentialsError = (await searchParams).error === "credentials"
 
   return (
@@ -21,8 +27,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
         <SignInForm />
         <div className="bg-muted p-4 text-sm">
           <p className="font-medium">入力例</p>
-          <p className="mt-2 text-muted-foreground">Email: user1@mail.com</p>
-          <p className="text-muted-foreground">Password: demo-password</p>
+          <p className="mt-2 text-muted-foreground">メールアドレス: user1@mail.com</p>
+          <p className="text-muted-foreground">パスワード: demo-password</p>
         </div>
       </CardContent>
     </Card>

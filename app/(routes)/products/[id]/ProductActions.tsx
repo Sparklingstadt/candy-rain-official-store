@@ -15,7 +15,8 @@ export function ProductActions({ variants, variantId, onVariantChange }: {
 
   return (
     <div className="space-y-6">
-      <div>
+      {/* A single variant is the product itself, so there is nothing to choose. */}
+      {variants.length > 1 && <div>
         <p className="mb-3 text-sm font-medium">バリエーションを選択</p>
         <div className="grid gap-2">
         { variants.map(v => (
@@ -35,11 +36,11 @@ export function ProductActions({ variants, variantId, onVariantChange }: {
           </button>
         ))}
         </div>
-      </div>
+      </div>}
       <AddItemToCartForm
         key={variantId}
         variantId={variantId}
-        isAvailable={selectedVariant.stock > 0}
+        stock={selectedVariant.stock}
       />
     </div>
   )

@@ -12,7 +12,7 @@ import StoreFooter from "@/app/components/StoreFooter";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "Candy Rain Store",
+  title: { template: "%s | Candy Rain Store", default: "Candy Rain Store" },
   description: "EC Shopping app developed with Next.js v16",
 };
 

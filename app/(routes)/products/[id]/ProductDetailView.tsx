@@ -41,7 +41,7 @@ export default function ProductDetailView({ product, images, variants, variantIm
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.name}</h1>
             <p className="text-2xl font-semibold text-primary">
               {formatPrice(selectedVariant.price)}
-              <span className="ml-2 text-sm font-medium text-muted-foreground">{selectedVariant.name}</span>
+              {selectedVariant.name !== product.name && <span className="ml-2 text-sm font-medium text-muted-foreground">{selectedVariant.name}</span>}
             </p>
             <p className="leading-7 text-muted-foreground">{product.description || "日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。"}</p>
           </div>

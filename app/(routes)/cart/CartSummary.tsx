@@ -14,11 +14,11 @@ export function CartSummary({
     <div className="space-y-4 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-7">
       <h2 className="text-xl font-semibold">ご注文内容</h2>
       <div className="flex justify-between text-sm">
-        <p>小計</p>
+        <p>小計（税込）</p>
         <p>{formatPrice(subTotalPrice)}</p>
       </div>
       <div className="flex justify-between text-sm">
-        <p>送料</p>
+        <p>送料（税込）</p>
         <p>{formatPrice(shippingPrice)}</p>
       </div>
       <Separator />

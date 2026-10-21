@@ -18,9 +18,9 @@
         - cell "1"
         - cell /¥\d+/
   - text: お支払い内容
-  - paragraph: 小計(税込)
+  - paragraph: 小計（税込）
   - paragraph: /¥\d+/
-  - paragraph: 送料(税込)
+  - paragraph: 送料（税込）
   - paragraph: /¥\d+,\d+/
   - separator
   - paragraph: 合計

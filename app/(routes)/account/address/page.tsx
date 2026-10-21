@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { ChevronLeft, MapPin } from "lucide-react"
 import PageHeader from "@/app/components/PageHeader"
@@ -5,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { requireUserId } from "@/lib/auth"
 import { getUserByUserId } from "@/services/storeQueryService"
 import { UserRepository } from "@/repositories/implementations/userRepository"
+
+export const metadata: Metadata = { title: "お届け先住所" }
 
 export default async function Page(){
   const userId = await requireUserId()

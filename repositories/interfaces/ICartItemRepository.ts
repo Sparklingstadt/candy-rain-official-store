@@ -12,7 +12,7 @@ export interface ICartItemRepository {
     cartId: number,
     variantId: number, 
     quantity: number
-  }): void,
+  }): Promise<CartItem | null>,
   removeCartItemForUser(userId: number, variantId: number): Promise<number>,
   incrementQuantityForUser(cartItemId: number, userId: number): Promise<number>,
   decrementQuantityForUser(cartItemId: number, userId: number): Promise<number>

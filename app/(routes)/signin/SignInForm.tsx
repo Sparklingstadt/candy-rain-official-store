@@ -1,9 +1,9 @@
 import { signIn } from "@/auth"
 import { redirect } from "next/navigation"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AuthError } from "next-auth"
+import SignInButton from "./SignInButton"
 
 export function SignInForm() {
   const handleSignIn = async (formData: FormData) => {
@@ -27,14 +27,14 @@ export function SignInForm() {
   return (
     <form action={handleSignIn} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">メールアドレス</Label>
         <Input id="email" name="email" type="email" autoComplete="email" defaultValue="user1@mail.com" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">パスワード</Label>
         <Input id="password" name="password" type="password" autoComplete="current-password" defaultValue="demo-password" required />
       </div>
-      <Button type="submit" size="lg" className="h-11 w-full">Sign In</Button>
+      <SignInButton />
     </form>
   )
 }

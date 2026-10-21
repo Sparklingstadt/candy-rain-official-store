@@ -13,7 +13,9 @@ export class CartItemRepository implements ICartItemRepository {
       where: { cartId },
       include: {
         variant: true
-      }
+      },
+      // Keep rows in place while quantities change; updates would otherwise reorder them.
+      orderBy: { id: "asc" },
     })
   }
   async addToCart({
@@ -25,22 +27,34 @@ export class CartItemRepository implements ICartItemRepository {
     variantId: number,
     quantity: number
   }) {
-    return await prisma.cartItem.upsert({
-      where: {
-        cartId_variantId: {
-          cartId,
-          variantId
-        }
-      },
-      update: {
-        quantity
-      },
-      create: {
-        cartId,
-        variantId,
-        quantity
+    // Adding an item already in the cart increases its quantity instead of resetting it.
+    return prisma.$transaction(async tx => {
+      const [variant, cartItem] = await Promise.all([
+        tx.variant.findUnique({ where: { id: variantId } }),
+        tx.cartItem.findUnique({ where: { cartId_variantId: { cartId, variantId } } }),
+      ])
+      const nextQuantity = (cartItem?.quantity ?? 0) + quantity
+      if (!variant || nextQuantity > variant.stock || nextQuantity > MAX_CART_QUANTITY) {
+        return null
       }
-    })
+
+      return tx.cartItem.upsert({
+        where: {
+          cartId_variantId: {
+            cartId,
+            variantId
+          }
+        },
+        update: {
+          quantity: nextQuantity
+        },
+        create: {
+          cartId,
+          variantId,
+          quantity
+        }
+      })
+    }, { isolationLevel: "Serializable" })
   }
   async removeCartItemForUser(userId: number, variantId: number) {
     const result = await prisma.cartItem.deleteMany({

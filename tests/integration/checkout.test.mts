@@ -167,3 +167,32 @@ test("在庫不足の場合は注文・在庫・カートを変更しない", as
     2,
   )
 })
+
+test("同じ商品をカートへ追加すると数量を加算し、在庫を超える追加は拒否する", async () => {
+  const cart = await prisma.cart.findUniqueOrThrow({ where: { userId: 0 } })
+  await prisma.variant.update({ where: { id: 0 }, data: { stock: 5 } })
+  const quantity = async () => (await prisma.cartItem.findUniqueOrThrow({
+    where: { cartId_variantId: { cartId: cart.id, variantId: 0 } },
+  })).quantity
+
+  await addItemToCart({ userId: 0, variantId: 0, quantity: 2 })
+  await addItemToCart({ userId: 0, variantId: 0, quantity: 3 })
+  assert.equal(await quantity(), 5)
+
+  await assert.rejects(() => addItemToCart({ userId: 0, variantId: 0, quantity: 1 }), (error) => {
+    assert.ok(error instanceof CartError)
+    assert.equal(error.code, "QUANTITY_UNAVAILABLE")
+    return true
+  })
+  assert.equal(await quantity(), 5)
+})
+
+test("注文履歴は新しい注文から並ぶ", async () => {
+  const orderData = { userId: 0, paymentStatus: INITIAL_PAYMENT_STATUS, shippingStatus: INITIAL_SHIPPING_STATUS, shippingPrice: 1000, totalPrice: 1500 }
+  const older = await prisma.order.create({ data: { ...orderData, orderedAt: new Date("2026-01-01T00:00:00Z") } })
+  const newer = await prisma.order.create({ data: { ...orderData, orderedAt: new Date("2026-02-01T00:00:00Z") } })
+  await prisma.order.update({ where: { id: older.id }, data: { totalPrice: 1600 } })
+
+  const orders = await new OrderRepository().findManyByUserId(0)
+  assert.deepEqual(orders.map(order => order.id), [newer.id, older.id])
+})

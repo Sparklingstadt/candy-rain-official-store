@@ -10,9 +10,9 @@ test.afterAll(async () => {
 
 async function signIn(page: Page) {
   await page.goto("/signin")
-  await page.getByLabel("Email").fill("user1@mail.com")
-  await page.getByLabel("Password").fill("demo-password")
-  await page.getByRole("button", { name: "Sign In" }).click()
+  await page.getByLabel("メールアドレス").fill("user1@mail.com")
+  await page.getByLabel("パスワード").fill("demo-password")
+  await page.getByRole("button", { name: "サインイン" }).click()
   await expect(page).toHaveURL(/\/products$/)
 }
 
@@ -20,14 +20,14 @@ test("未認証ユーザーをサインイン画面へ誘導する", async ({ pa
   await page.goto("/products")
 
   await expect(page).toHaveURL(/\/signin$/)
-  await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "サインイン" })).toBeVisible()
 })
 
 test("未認証ユーザーを商品詳細からもサインイン画面へ誘導する", async ({ page }) => {
   await page.goto("/products/0")
 
   await expect(page).toHaveURL(/\/signin$/)
-  await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "サインイン" })).toBeVisible()
 })
 
 test("未認証でも公開商品画像を配信する", async ({ request }) => {
@@ -45,9 +45,9 @@ test("未認証でも公開商品画像を配信する", async ({ request }) => 
 
 test("パスワードが正しくない場合はサインインできない", async ({ page }) => {
   await page.goto("/signin")
-  await page.getByLabel("Email").fill("user1@mail.com")
-  await page.getByLabel("Password").fill("wrong-password")
-  await page.getByRole("button", { name: "Sign In" }).click()
+  await page.getByLabel("メールアドレス").fill("user1@mail.com")
+  await page.getByLabel("パスワード").fill("wrong-password")
+  await page.getByRole("button", { name: "サインイン" }).click()
 
   await expect(page).toHaveURL(/\/signin\?error=credentials$/)
   await expect(page.getByText("メールアドレスまたはパスワードが正しくありません。", { exact: true })).toBeVisible()

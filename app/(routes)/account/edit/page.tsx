@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react"
 import PageHeader from "@/app/components/PageHeader"
@@ -5,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+
+export const metadata: Metadata = { title: "アカウント情報を編集" }
 
 export default function Page(){
   return (

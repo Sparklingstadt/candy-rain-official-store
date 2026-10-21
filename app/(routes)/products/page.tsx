@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { getProductsWithVariants } from "@/services/storeQueryService"
 import ProductList from "./ProductList"
 import SalesTypeFilter from "./SalesTypeFilter"
@@ -6,6 +7,8 @@ import { ProductRepository } from "@/repositories/implementations/productReposit
 import PageHeader from "@/app/components/PageHeader"
 import { Skeleton } from "@/components/ui/skeleton"
 import { parseSalesTypeSlug } from "@/lib/salesTypes"
+
+export const metadata: Metadata = { title: "商品一覧" }
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ type?: string | string[] }> }){
   const { type } = await searchParams
