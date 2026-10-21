@@ -21,6 +21,8 @@ export default function ProductDetailView({ product, images, variants, variantIm
   // Start on the product's overall image; switch to a variant's image once the shopper picks one.
   const [imageSrc, setImageSrc] = useState(images[0]?.src)
   const selectedVariant = variants.find(variant => variant.id === variantId) ?? variants[0]
+  // A single variant is the product itself, so there is nothing to choose or label.
+  const hasVariantChoice = variants.length > 1
 
   const selectVariant = (id: number) => {
     setVariantId(id)
@@ -41,11 +43,11 @@ export default function ProductDetailView({ product, images, variants, variantIm
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{product.name}</h1>
             <p className="text-2xl font-semibold text-primary">
               {formatPrice(selectedVariant.price)}
-              <span className="ml-2 text-sm font-medium text-muted-foreground">{selectedVariant.name}</span>
+              {hasVariantChoice && <span className="ml-2 text-sm font-medium text-muted-foreground">{selectedVariant.name}</span>}
             </p>
             <p className="leading-7 text-muted-foreground">{product.description || "日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。"}</p>
           </div>
-          <ProductActions variants={variants} variantId={variantId} onVariantChange={selectVariant} />
+          <ProductActions variants={variants} selectedVariant={selectedVariant} showVariantPicker={hasVariantChoice} onVariantChange={selectVariant} />
           {children}
         </div>
       </div>

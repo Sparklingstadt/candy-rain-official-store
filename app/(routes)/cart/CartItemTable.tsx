@@ -6,7 +6,8 @@ import { getVariantImageUrl } from "@/lib/product-images"
 import { formatPrice } from "@/lib/format"
 import { CartItemRow } from "./CartItemRow"
 import { CartItemWithVariant } from "@/lib/types"
-import { Trash2 } from "lucide-react"
+import { LoaderCircle, Trash2 } from "lucide-react"
+import { useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -25,14 +26,20 @@ function CartItemProduct({ cartItem, detail }: { cartItem: CartItemWithVariant; 
   )
 }
 
-export default function CartItemTable({ cartItems }: { cartItems: CartItemWithVariant[] }) {
-  const handleRemoveCartItem = async (variantId: number) => {
-    await removeCartItemAction({ variantId })
-  }
+function RemoveCartItemButton({ variantId }: { variantId: number }) {
+  const [isPending, startTransition] = useTransition()
+  return (
+    <Button variant="ghost" size="icon" disabled={isPending} onClick={() => startTransition(async () => { await removeCartItemAction({ variantId }) })}>
+      {isPending ? <LoaderCircle className="animate-spin" /> : <Trash2 />}
+      <span className="sr-only">削除</span>
+    </Button>
+  )
+}
 
+export default function CartItemTable({ cartItems }: { cartItems: CartItemWithVariant[] }) {
   return (
     <>
-      <Card className="hidden py-0 md:block">
+      <Card className="hidden h-fit py-0 md:block">
         <Table>
           <TableHeader><TableRow><TableHead className="p-4">商品名</TableHead><TableHead>価格</TableHead><TableHead>数量</TableHead><TableHead>削除</TableHead><TableHead className="text-right">合計</TableHead></TableRow></TableHeader>
           <TableBody>
@@ -41,7 +48,7 @@ export default function CartItemTable({ cartItems }: { cartItems: CartItemWithVa
                 <TableCell className="p-4"><CartItemProduct cartItem={cartItem} /></TableCell>
                 <TableCell>{formatPrice(cartItem.variant.price)}</TableCell>
                 <TableCell><CartItemRow cartItem={cartItem} /></TableCell>
-                <TableCell><Button variant="ghost" size="icon" onClick={() => handleRemoveCartItem(cartItem.variant.id)}><Trash2 /><span className="sr-only">削除</span></Button></TableCell>
+                <TableCell><RemoveCartItemButton variantId={cartItem.variant.id} /></TableCell>
                 <TableCell className="text-right font-semibold">{formatPrice(cartItem.quantity * cartItem.variant.price)}</TableCell>
               </TableRow>
             ))}
@@ -52,7 +59,7 @@ export default function CartItemTable({ cartItems }: { cartItems: CartItemWithVa
         {cartItems.map(cartItem => (
           <Card key={cartItem.variantId}>
             <CardContent className="space-y-4">
-              <div className="flex items-start justify-between gap-4"><CartItemProduct cartItem={cartItem} detail={<p className="mt-1 text-sm text-muted-foreground">{formatPrice(cartItem.variant.price)} / 個</p>} /><Button variant="ghost" size="icon" onClick={() => handleRemoveCartItem(cartItem.variant.id)}><Trash2 /><span className="sr-only">削除</span></Button></div>
+              <div className="flex items-start justify-between gap-4"><CartItemProduct cartItem={cartItem} detail={<p className="mt-1 text-sm text-muted-foreground">{formatPrice(cartItem.variant.price)} / 個</p>} /><RemoveCartItemButton variantId={cartItem.variant.id} /></div>
               <div className="flex items-center justify-between"><CartItemRow cartItem={cartItem} /><p className="font-semibold">{formatPrice(cartItem.quantity * cartItem.variant.price)}</p></div>
             </CardContent>
           </Card>

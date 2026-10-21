@@ -1,6 +1,6 @@
 import { CartRepository } from "@/repositories/implementations/cartRepository"
 import { CartItemRepository } from "@/repositories/implementations/cartItemRepository"
-import { VariantRepository } from "@/repositories/implementations/variantRepository"
+import { MAX_CART_QUANTITY } from "@/lib/validation"
 
 export type CartErrorCode = "OUT_OF_STOCK" | "QUANTITY_UNAVAILABLE"
 
@@ -21,19 +21,18 @@ export async function addItemToCart({
   variantId: number
   quantity: number
 }) {
-  const cartRepo = new CartRepository()
-  const variantRepo = new VariantRepository()
-  const [cart, variant] = await Promise.all([
-    cartRepo.findByUserId(userId),
-    variantRepo.findById(variantId),
-  ])
+  const cart = await new CartRepository().findByUserId(userId)
   if (!cart) throw new Error("Cart not found")
-  if (!variant || variant.stock < quantity) {
-    throw new CartError("OUT_OF_STOCK", "選択した商品は売り切れです")
-  }
 
-  const repo = new CartItemRepository()
-  await repo.addToCart({ cartId: cart.id, variantId, quantity })
+  const result = await new CartItemRepository().addToCart({ cartId: cart.id, variantId, quantity })
+  if ("error" in result) {
+    throw result.error === "OUT_OF_STOCK"
+      ? new CartError("OUT_OF_STOCK", "選択した商品は売り切れです")
+      : new CartError(
+        "QUANTITY_UNAVAILABLE",
+        `カートの数量と合わせて在庫数・上限（${MAX_CART_QUANTITY}個）を超えるため追加できません`,
+      )
+  }
 }
 
 export async function removeItemFromCart(userId: number, variantId: number) {

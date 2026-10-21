@@ -50,7 +50,7 @@ test.describe("商品操作 (#21)", () => {
     test(`存在しない・不正な商品ID ${id} に404を表示する`, async ({ page, shopper }) => {
       await shopper.signIn(page)
       await page.goto(`/products/${id}`)
-      await expect(page.getByRole("heading", { name: "404", exact: true })).toBeVisible()
+      await expect(page.getByRole("heading", { name: "ページが見つかりません", exact: true })).toBeVisible()
       await expect(page.getByRole("button", { name: "カートに追加" })).toHaveCount(0)
     })
   }

@@ -11,7 +11,8 @@ export class ProductRepository implements IProductRepository {
   async findManyWithVariants(salesType?: SalesType | null) {
     return await prisma.product.findMany({
       where: salesType ? { salesType } : undefined,
-      include: { variants: true }
+      include: { variants: { orderBy: { id: "asc" } } },
+      orderBy: { id: "asc" },
     })
   }
 }

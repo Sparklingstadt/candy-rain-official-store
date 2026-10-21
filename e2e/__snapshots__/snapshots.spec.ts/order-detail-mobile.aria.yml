@@ -7,10 +7,10 @@
   - paragraph: ランダム缶バッジ
   - paragraph: /¥\d+ × 1/
   - paragraph: /¥\d+/
-  - text: お支払い内容
-  - paragraph: 小計(税込)
+  - heading "お支払い内容" [level=2]
+  - paragraph: 小計（税込）
   - paragraph: /¥\d+/
-  - paragraph: 送料(税込)
+  - paragraph: 送料（税込）
   - paragraph: /¥\d+,\d+/
   - separator
   - paragraph: 合計

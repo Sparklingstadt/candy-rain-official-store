@@ -1,7 +1,10 @@
+import type { Metadata } from "next"
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+
+export const metadata: Metadata = { title: "サインアウトしました" }
 
 export default async function Page(){
   return (

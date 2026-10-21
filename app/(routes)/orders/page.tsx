@@ -1,8 +1,11 @@
+import type { Metadata } from "next"
 import { requireUserId } from "@/lib/auth"
 import { getOrders } from "@/services/storeQueryService"
 import { OrderRepository } from "@/repositories/implementations/orderRepository"
 import PageHeader from "@/app/components/PageHeader"
 import OrderHistory from "@/app/components/OrderHistory"
+
+export const metadata: Metadata = { title: "注文履歴" }
 
 export default async function Page() {
   const userId = await requireUserId()

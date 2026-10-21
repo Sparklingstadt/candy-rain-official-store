@@ -8,16 +8,26 @@ import PurchaseAssurance, { demoAssurances } from "@/app/components/PurchaseAssu
 import { getProductImageUrl, getVariantImageUrl } from "@/lib/product-images"
 import { toNonNegativeInteger } from "@/lib/validation"
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
+import { cache } from "react"
+
+// Shared by generateMetadata and Page so each request queries the product once.
+const loadProduct = cache(async (id: string) => {
+  const productId = toNonNegativeInteger(id)
+  return productId === null ? null : getProductById(new ProductRepository(), productId)
+})
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const product = await loadProduct((await params).id)
+  return { title: product?.name ?? "商品が見つかりません" }
+}
 
 export default async function Page({ params }: { 
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const productId = toNonNegativeInteger(id)
-  if (productId === null) notFound()
   await requireUserId()
-  const repo = new ProductRepository()
-  const product = await getProductById(repo, productId)
+  const product = await loadProduct(id)
   if(!product) notFound()
   const variantRepo = new VariantRepository()
   const variants = await getVariantsByProductId(variantRepo, product.id)

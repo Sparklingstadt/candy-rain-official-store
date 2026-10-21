@@ -22,9 +22,9 @@ export const test = base.extend<{ shopper: Shopper; database: pg.Pool }>({
       await database.query('INSERT INTO "Cart" ("userId") VALUES ($1)', [id])
       await provide({ id, email, signIn: async page => {
         await page.goto("/signin")
-        await page.getByLabel("Email", { exact: true }).fill(email)
-        await page.getByLabel("Password", { exact: true }).fill("demo-password")
-        await page.getByRole("button", { name: "Sign In", exact: true }).click()
+        await page.getByLabel("メールアドレス", { exact: true }).fill(email)
+        await page.getByLabel("パスワード", { exact: true }).fill("demo-password")
+        await page.getByRole("button", { name: "サインイン", exact: true }).click()
         await expect(page).toHaveURL(/\/products$/)
         await expect(page.getByRole("heading", { name: "商品一覧", exact: true })).toBeVisible()
       } })

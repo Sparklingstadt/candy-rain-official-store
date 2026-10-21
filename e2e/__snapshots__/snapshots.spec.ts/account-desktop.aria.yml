@@ -13,7 +13,7 @@
   - paragraph: Test Shopper
   - paragraph: /\d+-\d+/
   - paragraph: XX県 YY市 ZZ丁目 A-B-C号室
-  - link "住所を見る(1)":
+  - link "お届け先を確認":
     - /url: /account/address
   - text: プロフィール アカウント情報の確認
   - paragraph: デモユーザーとしてサインインしています。

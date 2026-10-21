@@ -3,15 +3,22 @@ import { requireUserId } from "@/lib/auth"
 import { OrderItemRepository } from "@/repositories/implementations/orderItemRepository"
 import { OrderRepository } from "@/repositories/implementations/orderRepository"
 import Link from "next/link"
-import { ChevronLeft, PartyPopper } from "lucide-react"
+import { ArrowRight, ChevronLeft, PartyPopper } from "lucide-react"
+import { buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent } from "@/components/ui/card"
+import PriceSummary from "@/app/components/PriceSummary"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { notFound } from "next/navigation"
 import { toNonNegativeInteger } from "@/lib/validation"
 import { formatOrderDateTime, formatPrice } from "@/lib/format"
 import { calculateSubtotal } from "@/services/checkout/orderPricing"
+import type { Metadata } from "next"
+
+export async function generateMetadata({ params }: { params: Promise<{ orderId: string }> }): Promise<Metadata> {
+  const orderId = toNonNegativeInteger((await params).orderId)
+  return { title: orderId === null ? "注文詳細" : `注文 #${orderId}` }
+}
 
 export default async function Page({
   params,
@@ -41,6 +48,10 @@ export default async function Page({
           <div>
             <p className="font-semibold">ご注文ありがとうございます</p>
             <p className="mt-1 text-sm">注文 #{orderId} を受け付けました。配送状況はこのページと注文履歴から確認できます。</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link href="/products" className={buttonVariants({ size: "sm" })}>買い物を続ける <ArrowRight /></Link>
+              <Link href="/orders" className={buttonVariants({ variant: "outline", size: "sm", className: "bg-card" })}>注文履歴を見る</Link>
+            </div>
           </div>
         </div>
       ) : null}
@@ -64,7 +75,7 @@ export default async function Page({
           </Card>
         ))}
       </div>
-      <Card className="h-fit shadow-xl shadow-primary/5"><CardHeader><CardTitle>お支払い内容</CardTitle></CardHeader><CardContent className="space-y-4"><div className="flex justify-between text-sm"><p>小計(税込)</p><p>{formatPrice(subTotalPrice)}</p></div><div className="flex justify-between text-sm"><p>送料(税込)</p><p>{formatPrice(order.shippingPrice)}</p></div><Separator /><div className="flex items-end justify-between"><p className="font-medium">合計</p><p className="text-2xl font-semibold text-primary">{formatPrice(order.totalPrice)}</p></div></CardContent></Card>
+      <PriceSummary title="お支払い内容" subTotalPrice={subTotalPrice} shippingPrice={order.shippingPrice} totalPrice={order.totalPrice} className="h-fit" />
       </div>
     </div>
   )
