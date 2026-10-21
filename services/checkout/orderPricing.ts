@@ -17,6 +17,10 @@ export function calculateSubtotal(lines: PricedLine[]) {
   return lines.reduce((total, line) => total + line.price * line.quantity, 0)
 }
 
+export function calculateCartQuantity(items: { quantity: number }[]) {
+  return items.reduce((total, item) => total + item.quantity, 0)
+}
+
 export function calculateCartSubtotal(items: PricedCartItem[]) {
   return calculateSubtotal(items.map(item => ({ price: item.variant.price, quantity: item.quantity })))
 }

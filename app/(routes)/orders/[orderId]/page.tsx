@@ -6,8 +6,8 @@ import Link from "next/link"
 import { ArrowRight, ChevronLeft, PartyPopper } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent } from "@/components/ui/card"
+import PriceSummary from "@/app/components/PriceSummary"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { notFound } from "next/navigation"
 import { toNonNegativeInteger } from "@/lib/validation"
@@ -75,7 +75,7 @@ export default async function Page({
           </Card>
         ))}
       </div>
-      <Card className="h-fit shadow-xl shadow-primary/5"><CardHeader><CardTitle>お支払い内容</CardTitle></CardHeader><CardContent className="space-y-4"><div className="flex justify-between text-sm"><p>小計（税込）</p><p>{formatPrice(subTotalPrice)}</p></div><div className="flex justify-between text-sm"><p>送料（税込）</p><p>{formatPrice(order.shippingPrice)}</p></div><Separator /><div className="flex items-end justify-between"><p className="font-medium">合計</p><p className="text-2xl font-semibold text-primary">{formatPrice(order.totalPrice)}</p></div></CardContent></Card>
+      <PriceSummary title="お支払い内容" subTotalPrice={subTotalPrice} shippingPrice={order.shippingPrice} totalPrice={order.totalPrice} className="h-fit" />
       </div>
     </div>
   )

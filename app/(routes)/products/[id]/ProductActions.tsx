@@ -6,17 +6,17 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/format"
 
-export function ProductActions({ variants, variantId, onVariantChange }: {
+export function ProductActions({ variants, selectedVariant, showVariantPicker, onVariantChange }: {
   variants: Variant[]
-  variantId: number
+  selectedVariant: Variant
+  showVariantPicker: boolean
   onVariantChange: (variantId: number) => void
 }) {
-  const selectedVariant = variants.find(variant => variant.id === variantId) ?? variants[0]
+  const variantId = selectedVariant.id
 
   return (
     <div className="space-y-6">
-      {/* A single variant is the product itself, so there is nothing to choose. */}
-      {variants.length > 1 && <div>
+      {showVariantPicker && <div>
         <p className="mb-3 text-sm font-medium">バリエーションを選択</p>
         <div className="grid gap-2">
         { variants.map(v => (

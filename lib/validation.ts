@@ -1,5 +1,10 @@
 export const MAX_CART_QUANTITY = 99
 
+// A cart line can never exceed the variant's stock or the per-line limit.
+export function maxCartQuantityFor(stock: number) {
+  return Math.min(stock, MAX_CART_QUANTITY)
+}
+
 export function toNonNegativeInteger(value: unknown) {
   if (typeof value === "string" && value.trim() === "") return null
 

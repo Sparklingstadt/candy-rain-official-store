@@ -2,9 +2,12 @@ import { auth } from "@/auth"
 import type { NextRequest } from "next/server"
 
 const demoProxy = auth((req) => {
-  if(!req.auth && !["/signin", "/signout"].includes(req.nextUrl.pathname)) {
-    const newUrl = new URL("/signin", req.nextUrl.origin)
-    return Response.redirect(newUrl)
+  const { pathname, origin } = req.nextUrl
+  if(!req.auth && !["/signin", "/signout"].includes(pathname)) {
+    return Response.redirect(new URL("/signin", origin))
+  }
+  if(req.auth && pathname === "/signin") {
+    return Response.redirect(new URL("/products", origin))
   }
 })
 

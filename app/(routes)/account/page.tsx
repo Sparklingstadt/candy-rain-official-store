@@ -18,10 +18,11 @@ const RECENT_ORDER_COUNT = 3
 
 export default async function Page() {
   const userId = await requireUserId()
-  const repo = new OrderRepository()
-  const orders = await getOrders(repo, userId)
-  const userRepo = new UserRepository()
-  const user = await getUserByUserId(userRepo, userId)
+  // One extra row tells whether to link to the full order history.
+  const [orders, user] = await Promise.all([
+    getOrders(new OrderRepository(), userId, RECENT_ORDER_COUNT + 1),
+    getUserByUserId(new UserRepository(), userId),
+  ])
 
   return (
     <div className="space-y-10">

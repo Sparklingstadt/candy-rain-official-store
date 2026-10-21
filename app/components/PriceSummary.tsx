@@ -1,18 +1,24 @@
 import { Separator } from "@/components/ui/separator"
 import { formatPrice } from "@/lib/format"
+import { cn } from "@/lib/utils"
 
-export function CartSummary({
+// Subtotal / shipping / total breakdown shared by the cart and order detail pages.
+export default function PriceSummary({
+  title,
   subTotalPrice,
   shippingPrice,
-  totalPrice
+  totalPrice,
+  className,
 }: {
+  title: string,
   subTotalPrice: number,
   shippingPrice: number,
-  totalPrice: number
+  totalPrice: number,
+  className?: string,
 }) {
   return (
-    <div className="space-y-4 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-7">
-      <h2 className="text-xl font-semibold">ご注文内容</h2>
+    <div className={cn("space-y-4 border bg-card p-6 shadow-xl shadow-primary/5 sm:p-7", className)}>
+      <h2 className="text-xl font-semibold">{title}</h2>
       <div className="flex justify-between text-sm">
         <p>小計（税込）</p>
         <p>{formatPrice(subTotalPrice)}</p>

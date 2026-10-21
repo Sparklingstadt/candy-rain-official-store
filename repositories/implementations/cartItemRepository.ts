@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
-import { ICartItemRepository } from "../interfaces/ICartItemRepository"
-import { MAX_CART_QUANTITY } from "@/lib/validation"
+import { AddToCartResult, ICartItemRepository } from "../interfaces/ICartItemRepository"
+import { maxCartQuantityFor } from "@/lib/validation"
 
 export class CartItemRepository implements ICartItemRepository {
   async findManyByCartId(cartId: number) {
@@ -28,32 +28,19 @@ export class CartItemRepository implements ICartItemRepository {
     quantity: number
   }) {
     // Adding an item already in the cart increases its quantity instead of resetting it.
-    return prisma.$transaction(async tx => {
-      const [variant, cartItem] = await Promise.all([
-        tx.variant.findUnique({ where: { id: variantId } }),
-        tx.cartItem.findUnique({ where: { cartId_variantId: { cartId, variantId } } }),
-      ])
-      const nextQuantity = (cartItem?.quantity ?? 0) + quantity
-      if (!variant || nextQuantity > variant.stock || nextQuantity > MAX_CART_QUANTITY) {
-        return null
-      }
+    return prisma.$transaction(async (tx): Promise<AddToCartResult> => {
+      const variant = await tx.variant.findUnique({ where: { id: variantId } })
+      if (!variant || variant.stock <= 0) return { error: "OUT_OF_STOCK" }
 
-      return tx.cartItem.upsert({
-        where: {
-          cartId_variantId: {
-            cartId,
-            variantId
-          }
-        },
-        update: {
-          quantity: nextQuantity
-        },
-        create: {
-          cartId,
-          variantId,
-          quantity
-        }
-      })
+      const cartItem = await tx.cartItem.findUnique({ where: { cartId_variantId: { cartId, variantId } } })
+      const nextQuantity = (cartItem?.quantity ?? 0) + quantity
+      if (nextQuantity > maxCartQuantityFor(variant.stock)) return { error: "QUANTITY_UNAVAILABLE" }
+
+      return {
+        cartItem: cartItem
+          ? await tx.cartItem.update({ where: { id: cartItem.id }, data: { quantity: nextQuantity } })
+          : await tx.cartItem.create({ data: { cartId, variantId, quantity: nextQuantity } }),
+      }
     }, { isolationLevel: "Serializable" })
   }
   async removeCartItemForUser(userId: number, variantId: number) {
@@ -77,8 +64,7 @@ export class CartItemRepository implements ICartItemRepository {
 
       if (
         !cartItem ||
-        cartItem.quantity >= MAX_CART_QUANTITY ||
-        cartItem.quantity >= cartItem.variant.stock
+        cartItem.quantity >= maxCartQuantityFor(cartItem.variant.stock)
       ) {
         return 0
       }

@@ -4,8 +4,8 @@ import CartItemTable from "./CartItemTable"
 import PlaceOrderButton from "./PlaceOrderButton"
 import { requireUserId } from "@/lib/auth"
 import { getCartByUserId, getCartItemsWithVariantsByCartId } from "@/services/storeQueryService"
-import { CartSummary } from "./CartSummary"
-import { calculateCartSubtotal, SHIPPING_PRICE } from "@/services/checkout/orderPricing"
+import PriceSummary from "@/app/components/PriceSummary"
+import { calculateCartQuantity, calculateCartSubtotal, SHIPPING_PRICE } from "@/services/checkout/orderPricing"
 import { CartItemRepository } from "@/repositories/implementations/cartItemRepository"
 import { CartRepository } from "@/repositories/implementations/cartRepository"
 import { ArrowRight, ChevronLeft, ShoppingBag } from "lucide-react"
@@ -24,7 +24,7 @@ export default async function Page(){
   const cartItems = await getCartItemsWithVariantsByCartId(repo, cart.id)
   const subTotalPrice = calculateCartSubtotal(cartItems)
   const totalPrice = subTotalPrice + SHIPPING_PRICE
-  const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0)
+  const totalQuantity = calculateCartQuantity(cartItems)
 
   return (
     <div className="space-y-8">
@@ -37,7 +37,7 @@ export default async function Page(){
         : <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <CartItemTable cartItems={cartItems} />
           <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-            <CartSummary subTotalPrice={subTotalPrice} shippingPrice={SHIPPING_PRICE} totalPrice={totalPrice} />
+            <PriceSummary title="ご注文内容" subTotalPrice={subTotalPrice} shippingPrice={SHIPPING_PRICE} totalPrice={totalPrice} />
             <PlaceOrderButton />
           </div>
         </div>}
