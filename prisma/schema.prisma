@@ -18,6 +18,11 @@ model User {
   passwordHash String
   firstName String
   lastName String
+  // The shipping address is optional until the user registers one.
+  postalCode String?
+  prefecture String?
+  addressLine1 String?
+  addressLine2 String?
   orders Order[]
   carts Cart[]
 }
