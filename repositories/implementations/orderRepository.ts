@@ -34,7 +34,8 @@ export class OrderRepository implements IOrderRepository {
       order.shippingPrice,
       order.totalPrice,
       order.orderedAt,
-      order.userId
+      order.userId,
+      order.paymentMethodLabel
     )
   }
 }

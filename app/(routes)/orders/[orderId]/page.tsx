@@ -75,7 +75,10 @@ export default async function Page({
           </Card>
         ))}
       </div>
-      <PriceSummary title="お支払い内容" subTotalPrice={subTotalPrice} shippingPrice={order.shippingPrice} totalPrice={order.totalPrice} className="h-fit" />
+      <div className="h-fit space-y-4">
+        <PriceSummary title="お支払い内容" subTotalPrice={subTotalPrice} shippingPrice={order.shippingPrice} totalPrice={order.totalPrice} />
+        {order.paymentMethodLabel && <div className="flex items-center justify-between gap-4 border bg-card px-6 py-4 text-sm"><p className="text-muted-foreground">お支払い方法</p><p className="font-medium">{order.paymentMethodLabel}</p></div>}
+      </div>
       </div>
     </div>
   )

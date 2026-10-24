@@ -7,6 +7,7 @@ export class Order {
     public readonly totalPrice: number,
     public readonly orderedAt: Date,
     public readonly userId: number,
+    public readonly paymentMethodLabel: string | null = null,
   ) {
     if(id < 0) {
       throw new Error("id must be non-negative!")

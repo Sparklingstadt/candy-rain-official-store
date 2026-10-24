@@ -9,6 +9,10 @@ import { calculateCartQuantity, calculateCartSubtotal, SHIPPING_PRICE } from "@/
 import { CartItemRepository } from "@/repositories/implementations/cartItemRepository"
 import { CartRepository } from "@/repositories/implementations/cartRepository"
 import { ArrowRight, ChevronLeft, ShoppingBag } from "lucide-react"
+import { isStripeEnabled } from "@/lib/stripe"
+import { UserRepository } from "@/repositories/implementations/userRepository"
+import { listSavedCards } from "@/services/payment/paymentMethodService"
+import { StripePaymentGateway } from "@/services/payment/stripePaymentGateway"
 import { buttonVariants } from "@/components/ui/button"
 import EmptyState from "@/app/components/EmptyState"
 import PageHeader from "@/app/components/PageHeader"
@@ -25,6 +29,10 @@ export default async function Page(){
   const subTotalPrice = calculateCartSubtotal(cartItems)
   const totalPrice = subTotalPrice + SHIPPING_PRICE
   const totalQuantity = calculateCartQuantity(cartItems)
+  const paymentEnabled = isStripeEnabled()
+  const cards = paymentEnabled && cartItems.length > 0
+    ? await listSavedCards(new StripePaymentGateway(), new UserRepository(), userId)
+    : []
 
   return (
     <div className="space-y-8">
@@ -38,7 +46,7 @@ export default async function Page(){
           <CartItemTable cartItems={cartItems} />
           <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
             <PriceSummary title="ご注文内容" subTotalPrice={subTotalPrice} shippingPrice={SHIPPING_PRICE} totalPrice={totalPrice} />
-            <PlaceOrderButton />
+            <PlaceOrderButton paymentEnabled={paymentEnabled} cards={cards} />
           </div>
         </div>}
     </div>

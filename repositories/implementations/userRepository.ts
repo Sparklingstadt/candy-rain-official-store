@@ -28,4 +28,24 @@ export class UserRepository implements IUserRepository {
       omit,
     })
   }
+
+  async findStripeCustomerId(userId: number) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { stripeCustomerId: true },
+    })
+    return user?.stripeCustomerId ?? null
+  }
+
+  async saveStripeCustomerId(userId: number, customerId: string) {
+    await prisma.user.updateMany({
+      where: { id: userId, stripeCustomerId: null },
+      data: { stripeCustomerId: customerId },
+    })
+    const user = await prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { stripeCustomerId: true },
+    })
+    return user.stripeCustomerId!
+  }
 }

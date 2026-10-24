@@ -5,7 +5,7 @@ import { getOrders, getUserByUserId } from "@/services/storeQueryService";
 import { OrderRepository } from "@/repositories/implementations/orderRepository";
 import { UserRepository } from "@/repositories/implementations/userRepository";
 import Link from "next/link";
-import { ArrowRight, MapPin, Pencil, UserRound } from "lucide-react"
+import { ArrowRight, CreditCard, MapPin, Pencil, UserRound } from "lucide-react"
 import OrderHistory from "@/app/components/OrderHistory"
 import ShippingAddress, { hasShippingAddress } from "@/app/components/ShippingAddress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -38,9 +38,10 @@ export default async function Page() {
         </div>
         <OrderHistory orders={orders.slice(0, RECENT_ORDER_COUNT)} />
       </section>
-      <section className="grid gap-4 md:grid-cols-2">
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-mint text-candy-mint-foreground"><MapPin className="size-5" /></span><CardTitle>お届け先住所</CardTitle><CardDescription>既定のお届け先</CardDescription></CardHeader><CardContent><ShippingAddress user={user} /><Link href="/account/address" className={buttonVariants({ variant: "outline", className: "mt-4" })}><Pencil /> {hasShippingAddress(user) ? "お届け先を編集" : "お届け先を登録"}</Link></CardContent></Card>
         <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-pink text-candy-pink-foreground"><UserRound className="size-5" /></span><CardTitle>プロフィール</CardTitle><CardDescription>アカウント情報の確認</CardDescription></CardHeader><CardContent><p className="text-muted-foreground">氏名を変更できます。</p><Link href="/account/edit" className={buttonVariants({ variant: "outline", className: "mt-4" })}><Pencil /> アカウント情報を編集</Link></CardContent></Card>
+        <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-lavender text-candy-lavender-foreground"><CreditCard className="size-5" /></span><CardTitle>お支払い方法</CardTitle><CardDescription>注文時に使うカード</CardDescription></CardHeader><CardContent><p className="text-muted-foreground">カードの追加・削除ができます。</p><Link href="/account/payment" className={buttonVariants({ variant: "outline", className: "mt-4" })}><CreditCard /> お支払い方法を管理</Link></CardContent></Card>
       </section>
     </div>
   )
