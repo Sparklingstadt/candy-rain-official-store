@@ -7,6 +7,7 @@ import { UserRepository } from "@/repositories/implementations/userRepository";
 import Link from "next/link";
 import { ArrowRight, MapPin, Pencil, UserRound } from "lucide-react"
 import OrderHistory from "@/app/components/OrderHistory"
+import ShippingAddress, { hasShippingAddress } from "@/app/components/ShippingAddress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import CandyPill from "@/app/components/CandyPill"
 import { buttonVariants } from "@/components/ui/button"
@@ -38,8 +39,8 @@ export default async function Page() {
         <OrderHistory orders={orders.slice(0, RECENT_ORDER_COUNT)} />
       </section>
       <section className="grid gap-4 md:grid-cols-2">
-        <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-mint text-candy-mint-foreground"><MapPin className="size-5" /></span><CardTitle>お届け先住所</CardTitle><CardDescription>デモ用に登録された住所</CardDescription></CardHeader><CardContent className="space-y-1 leading-6"><p className="font-medium">{user?.firstName} {user?.lastName}</p><p className="text-muted-foreground">000-0000</p><p className="text-muted-foreground">XX県 YY市 ZZ丁目 A-B-C号室</p><Link href="/account/address" className={buttonVariants({ variant: "outline", className: "mt-4" })}>お届け先を確認</Link></CardContent></Card>
-        <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-pink text-candy-pink-foreground"><UserRound className="size-5" /></span><CardTitle>プロフィール</CardTitle><CardDescription>アカウント情報の確認</CardDescription></CardHeader><CardContent><p className="text-muted-foreground">デモユーザーとしてサインインしています。</p><Link href="/account/edit" className={buttonVariants({ variant: "outline", className: "mt-4" })}><Pencil /> アカウント情報を編集</Link></CardContent></Card>
+        <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-mint text-candy-mint-foreground"><MapPin className="size-5" /></span><CardTitle>お届け先住所</CardTitle><CardDescription>既定のお届け先</CardDescription></CardHeader><CardContent><ShippingAddress user={user} /><Link href="/account/address" className={buttonVariants({ variant: "outline", className: "mt-4" })}><Pencil /> {hasShippingAddress(user) ? "お届け先を編集" : "お届け先を登録"}</Link></CardContent></Card>
+        <Card className=""><CardHeader><span className="flex size-11 items-center justify-center bg-candy-pink text-candy-pink-foreground"><UserRound className="size-5" /></span><CardTitle>プロフィール</CardTitle><CardDescription>アカウント情報の確認</CardDescription></CardHeader><CardContent><p className="text-muted-foreground">氏名を変更できます。</p><Link href="/account/edit" className={buttonVariants({ variant: "outline", className: "mt-4" })}><Pencil /> アカウント情報を編集</Link></CardContent></Card>
       </section>
     </div>
   )

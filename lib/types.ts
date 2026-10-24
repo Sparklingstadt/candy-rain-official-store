@@ -30,3 +30,8 @@ export type CartItemWithVariant = {
 export type ActionResult<T = object> =
   | ({ success: true } & T)
   | { success: false, message: string }
+
+// State for forms that show per-field errors next to the submitted values.
+export type FormActionState<F extends string> =
+  | { success: true }
+  | { success: false, message: string, fieldErrors: Partial<Record<F, string>>, values: Record<F, string> }

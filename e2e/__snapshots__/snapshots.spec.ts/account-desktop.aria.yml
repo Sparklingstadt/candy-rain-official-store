@@ -9,13 +9,11 @@
   - paragraph: 最初の商品を選んでみましょう。
   - link "商品を見る":
     - /url: /products
-  - text: お届け先住所 デモ用に登録された住所
-  - paragraph: Test Shopper
-  - paragraph: /\d+-\d+/
-  - paragraph: XX県 YY市 ZZ丁目 A-B-C号室
-  - link "お届け先を確認":
+  - text: お届け先住所 既定のお届け先
+  - paragraph: お届け先はまだ登録されていません。
+  - link "お届け先を登録":
     - /url: /account/address
   - text: プロフィール アカウント情報の確認
-  - paragraph: デモユーザーとしてサインインしています。
+  - paragraph: 氏名を変更できます。
   - link "アカウント情報を編集":
     - /url: /account/edit

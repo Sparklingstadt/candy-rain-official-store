@@ -73,6 +73,11 @@ async function main() {
     where: { id: 1 },
     data: { email: "user2@mail.com", passwordHash: demoPasswordHash }
   })
+  // Fill a fictional address only where none is registered, keeping addresses edited in the demo.
+  await prisma.user.updateMany({
+    where: { id: { in: [0, 1] }, postalCode: null },
+    data: { postalCode: "000-0000", prefecture: "東京都", addressLine1: "キャンディ市レイン町1-2-3", addressLine2: "ドロップハイツ101" }
+  })
 
   await prisma.cart.createMany({
     data: [
