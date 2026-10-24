@@ -17,7 +17,7 @@ Candy Rain は「小さなときめきを、ひと箱に。」をコンセプト
 | 数量変更・削除 | 入力値・所有者・在庫を確認 |
 | 購入手続き | 在庫減算・注文作成・カート削除を一つのトランザクションで実行 |
 | アカウント・注文履歴 | Auth.js のデモ認証、氏名・お届け先の編集、注文一覧・詳細 |
-| 決済・送料 | 実決済なし。デモ送料は 1,000 円 |
+| 決済・送料 | Stripe のテストモードでカードを登録・選択して決済（キー未設定時は決済なし）。デモ送料は 1,000 円 |
 
 デモのサインイン情報はサインイン画面に記載しています。
 
@@ -28,6 +28,7 @@ Candy Rain は「小さなときめきを、ひと箱に。」をコンセプト
 | Next.js 16 / React 19 / TypeScript | App Router、Server Components、Server Actions による UI とサーバー処理 |
 | Prisma ORM 7 / PostgreSQL | 商品・ユーザー・カート・注文の永続化とトランザクション |
 | Auth.js 5 beta / bcryptjs | Credentials 認証とパスワードハッシュの照合 |
+| Stripe（テストモード） | カードの保存（SetupIntent）と与信・売上確定（PaymentIntent） |
 | Tailwind CSS 4 / shadcn/ui / Base UI / Lucide | レスポンシブ UI と共通コンポーネント |
 | Node.js Test Runner / tsx / Playwright | 単体・DB 統合・ブラウザー E2E テスト |
 | Docker Compose / GitHub Actions / Vercel | ローカル DB、継続的な品質確認、ホスティング |
@@ -53,6 +54,7 @@ Prisma → PostgreSQL
 ## どう実装したか
 
 - **注文と在庫の整合性**：在庫が注文数量以上の場合だけ減算します。在庫不足や注文作成の失敗時はトランザクションをロールバックし、途中の減算を残しません。注文には購入時のバリエーション名と価格を保存します。
+- **決済と注文の整合性**：カードで金額を与信（オーソリ）してから注文を作成し、注文の保存後に売上を確定します。在庫不足などで注文を作成できなかった場合は与信を取り消すため、注文のない請求は発生しません。カード情報は Stripe が保管し、ストアには Stripe の ID と表示用のブランド・下4桁だけを保存します。
 - **入力・所有者の確認**：ID や数量、更新操作をサーバーで検証し、サインイン中のユーザーが所有するカート・注文を対象にします。数量は 1〜99 を受け付けます。氏名・お届け先は全角文字を正規化したうえで項目ごとに検証し、エラー時は入力値を保持して表示します。
 - **商品画像の一貫性**：[画像対応表](assets/candy-collection/shop-assets/image-mapping.json) を通して商品・バリエーションと素材を対応付けています。
 
@@ -88,6 +90,8 @@ npm run db:setup
 npm run dev
 ```
 
+カード決済を試す場合は、[Stripe のテストモード](https://docs.stripe.com/keys#test-live-modes)の API キーを `.env` の `STRIPE_SECRET_KEY`（`sk_test_` から始まる値）と `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`（`pk_test_`）に設定します。未設定の場合は決済なしで注文が確定します。本番用のキーは受け付けません。
+
 [localhost:3000](http://localhost:3000) を開きます。`db:setup` は設定確認、DB 起動、migration、seed を順に実行します。seed はデモユーザーのパスワード更新も含むため、学習用 DB を対象にしてください。
 
 5432 番ポートが使用中の場合は `.env` の `POSTGRES_PORT` と `DATABASE_URL` のポートを両方とも空きポートに変更します。`npm run dev` は設定を確認し PostgreSQL コンテナを起動してから Next.js を起動します。
@@ -106,7 +110,8 @@ npm run lint
 npm run typecheck          # Prisma・Next.js の型生成も含む
 npm run build
 npm run test:integration   # DB 統合テスト
-npm run test:e2e           # ブラウザー E2E
+npm run test:e2e           # ブラウザー E2E（決済なしの購入フロー）
+npm run test:e2e:stripe    # Stripe テストモードでのカード登録・決済 E2E（要テスト用キー）
 ```
 
 DB 統合・E2E テストには migration と seed を適用した専用のローカル PostgreSQL を使用してください。`test:e2e` はデータをリセットするため、共有 DB や本番 DB を対象にしないでください。Playwright の初回実行前には `npx playwright install chromium` を実行します。

@@ -17,3 +17,7 @@
   - paragraph: 氏名を変更できます。
   - link "アカウント情報を編集":
     - /url: /account/edit
+  - text: お支払い方法 注文時に使うカード
+  - paragraph: カードの追加・削除ができます。
+  - link "お支払い方法を管理":
+    - /url: /account/payment

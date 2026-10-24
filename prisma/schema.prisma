@@ -23,6 +23,8 @@ model User {
   prefecture String?
   addressLine1 String?
   addressLine2 String?
+  // Saved cards live in Stripe; only the customer reference is stored here.
+  stripeCustomerId String? @unique
   orders Order[]
   carts Cart[]
 }
@@ -62,6 +64,9 @@ model Order {
   shippingStatus String
   shippingPrice Int
   totalPrice Int
+  // Set when the order was paid with a saved card through Stripe.
+  paymentIntentId String? @unique
+  paymentMethodLabel String?
   orderedAt DateTime @default(now())
   orderItems OrderItem[]
   user User @relation(fields: [userId], references: [id])

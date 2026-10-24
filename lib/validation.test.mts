@@ -5,6 +5,7 @@ import {
   requireCartMutationType,
   requireCartQuantity,
   requireNonNegativeInteger,
+  requireStripeId,
   toNonNegativeInteger,
 } from "./validation"
 
@@ -29,4 +30,12 @@ test("数量変更種別はincrementかdecrementだけを受け入れる", () =>
   assert.equal(requireCartMutationType("increment"), "increment")
   assert.equal(requireCartMutationType("decrement"), "decrement")
   assert.throws(() => requireCartMutationType("delete"), /increment or decrement/)
+})
+
+test("StripeのIDは指定したプレフィックスの英数字だけを受け入れる", () => {
+  assert.equal(requireStripeId("pm_1AbC", "pm", "paymentMethodId"), "pm_1AbC")
+  assert.equal(requireStripeId("pi_3XyZ", "pi", "paymentIntentId"), "pi_3XyZ")
+  assert.throws(() => requireStripeId("pi_3XyZ", "pm", "paymentMethodId"), /paymentMethodId/)
+  assert.throws(() => requireStripeId("pm_../x", "pm", "paymentMethodId"), /paymentMethodId/)
+  assert.throws(() => requireStripeId(undefined, "pm", "paymentMethodId"), /paymentMethodId/)
 })

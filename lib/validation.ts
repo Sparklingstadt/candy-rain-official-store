@@ -32,3 +32,11 @@ export function requireCartMutationType(value: unknown) {
   }
   return value
 }
+
+// Stripe object IDs such as pm_... and pi_... sent back from the browser.
+export function requireStripeId(value: unknown, prefix: "pm" | "pi", fieldName: string) {
+  if (typeof value !== "string" || !new RegExp(`^${prefix}_[A-Za-z0-9]{1,255}$`).test(value)) {
+    throw new Error(`${fieldName} must be a Stripe ${prefix}_ ID`)
+  }
+  return value
+}
