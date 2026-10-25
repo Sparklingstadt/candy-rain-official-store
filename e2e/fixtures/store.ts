@@ -6,10 +6,17 @@ import pg from "pg"
 type Shopper = { id: number; email: string; signIn: (page: Page) => Promise<void> }
 type Admin = { email: string; signIn: (page: Page) => Promise<void> }
 
-export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.Pool }>({
+export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.Pool; seedVariant1: void }>({
   database: async ({}, provide) => {
     const database = new pg.Pool({ connectionString: process.env.DATABASE_URL })
     try { await provide(database) } finally { await database.end() }
+  },
+  // Tests that edit variant 1 opt in; teardown resets it to the seed values (stock 50, price 800) so a failed run self-heals.
+  // It depends on `database`, so it tears down before the pool ends.
+  seedVariant1: async ({ database }, provide) => {
+    try { await provide() } finally {
+      await database.query('UPDATE "Variant" SET stock = 50, price = 800 WHERE id = 1')
+    }
   },
   // The seeded admin account is shared and read-only here, so there is nothing to create or clean up.
   admin: async ({}, provide) => {
