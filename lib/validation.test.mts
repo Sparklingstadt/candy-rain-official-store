@@ -6,7 +6,9 @@ import {
   requireCartQuantity,
   requireConfirmation,
   requireNonNegativeInteger,
+  requirePrice,
   requireShippingStatus,
+  requireStockDelta,
   requireStripeId,
   toNonNegativeInteger,
 } from "./validation"
@@ -51,4 +53,23 @@ test("発送ステータスは定義済みの値だけ受け付ける", () => {
 test("キャンセルの確認チェックは on だけ受け付ける", () => {
   assert.doesNotThrow(() => requireConfirmation("on"))
   for (const value of [null, "", "off", "true"]) assert.throws(() => requireConfirmation(value), /confirmation/)
+})
+
+test("在庫の増減は 0 以外の -9999〜+9999 の整数を受け付ける", () => {
+  assert.equal(requireStockDelta("10"), 10)
+  assert.equal(requireStockDelta("+10"), 10)
+  assert.equal(requireStockDelta(" -3 "), -3)
+  assert.equal(requireStockDelta("9999"), 9999)
+  assert.equal(requireStockDelta("-9999"), -9999)
+  for (const value of ["0", "10000", "-10000", "1.5", "", null, "abc", "+", "1e3"]) {
+    assert.throws(() => requireStockDelta(value), /delta/, String(value))
+  }
+})
+
+test("価格は 1〜9,999,999 の整数を受け付ける", () => {
+  assert.equal(requirePrice("1"), 1)
+  assert.equal(requirePrice("9999999"), 9_999_999)
+  for (const value of ["0", "-1", "10000000", "1.5", "", null, "abc"]) {
+    assert.throws(() => requirePrice(value), /price/, String(value))
+  }
 })
