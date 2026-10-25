@@ -1,4 +1,19 @@
+import type { Page } from "@playwright/test"
 import { test, expect } from "./fixtures/store"
+
+type Shopper = { signIn: (page: Page) => Promise<void> }
+
+// Signs the shopper in, buys the first product and returns the new order id taken from /orders/{id}.
+async function placeOrderAs(shopper: Shopper, page: Page): Promise<number> {
+  await shopper.signIn(page)
+  await page.getByRole("link", { name: /ランダム缶バッジ/ }).click()
+  await page.getByRole("button", { name: "カートに追加" }).click()
+  await expect(page.getByRole("link", { name: "カート(1)" })).toBeVisible()
+  await page.getByRole("link", { name: "カート(1)" }).click()
+  await page.getByRole("button", { name: "注文を確定する", exact: true }).click()
+  await expect(page).toHaveURL(/\/orders\/\d+\?placed=1$/)
+  return Number(new URL(page.url()).pathname.split("/").pop())
+}
 
 test("管理者はサインイン後に注文管理へ移動し、ストアのページは開けない", async ({ page, admin }) => {
   await admin.signIn(page)
@@ -26,4 +41,33 @@ test("管理者が未定義の URL を開いても、カートがなくてもエ
   const response = await page.goto("/admin/no-such-page")
   expect(response?.status()).toBe(404)
   await expect(page.getByRole("heading", { name: /ページが見つかりません|注文が見つかりません/ })).toBeVisible()
+})
+
+test("管理者は顧客の注文を一覧と詳細で確認できる", async ({ page, shopper, admin, browser }) => {
+  const orderId = await placeOrderAs(shopper, page)
+  const adminContext = await browser.newContext()
+  try {
+    const adminPage = await adminContext.newPage()
+    await admin.signIn(adminPage)
+    const row = adminPage.getByRole("row", { name: new RegExp(`#${orderId}\\b`) })
+    await expect(row).toContainText("Shopper Test")
+    await expect(row).toContainText("未発送")
+    await adminPage.getByRole("link", { name: "発送準備中" }).click()
+    await expect(adminPage).toHaveURL(/shippingStatus=preparing$/)
+    await expect(adminPage.getByRole("row", { name: new RegExp(`#${orderId}\\b`) })).toHaveCount(0)
+    await adminPage.goto(`/admin/orders/${orderId}`)
+    await expect(adminPage.getByRole("heading", { name: `注文 #${orderId}` })).toBeVisible()
+    await expect(adminPage.getByRole("main")).toContainText(shopper.email)
+  } finally {
+    await adminContext.close()
+  }
+})
+
+test("不正・存在しない注文 ID は 404 になる", async ({ page, admin }) => {
+  await admin.signIn(page)
+  for (const id of ["abc", "-1", "999999"]) {
+    const response = await page.goto(`/admin/orders/${id}`)
+    expect(response?.status()).toBe(404)
+    await expect(page.getByText("注文が見つかりません")).toBeVisible()
+  }
 })
