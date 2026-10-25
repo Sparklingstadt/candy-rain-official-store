@@ -87,7 +87,7 @@ Candy Rain Store に管理者用の画面を追加する。管理画面で扱う
 
 - `canChangeShippingStatus(from, to)`：未発送・発送準備中・発送済みの 3 つの間で、`from !== to` なら `true`。それ以外（キャンセルへの変更、キャンセルからの変更、未知の値、同じ値）は `false`。
 - `canCancelOrder(shippingStatus)`：未発送・発送準備中なら `true`。
-- `canRetryRefund(shippingStatus, paymentStatus)`：キャンセル かつ 返金エラー なら `true`。
+- `canRetryRefund(shippingStatus, paymentStatus, hasPayment)`：キャンセル かつ 決済あり（`hasPayment`） かつ 支払い状態が返金済みでない なら `true`。返金エラーだけでなく、キャンセル確定後に処理が中断して支払い状態が「支払い済み」「決済エラー」のまま残った注文も再試行できる。
 
 発送ステータスの変更フォームではキャンセルを選べない。キャンセルは専用のキャンセル操作からだけ行う。
 
@@ -174,7 +174,7 @@ Stripe での返金は外部 API 呼び出しで、DB のトランザクショ�
    | 注文の支払い | 処理 | 支払い状態 |
    | --- | --- | --- |
    | 決済なし（`paymentIntentId` が null） | ゲートウェイを呼ばない | 変更しない |
-   | 決済あり（支払い済み・決済エラー） | `gateway.refund(paymentIntentId, "order-{id}-refund")` | 返金済み |
+   | 決済あり（支払い済み・決済エラー） | `gateway.refund(paymentIntentId, "refund-{paymentIntentId}")` | 返金済み |
 
 3. **返金に失敗した場合**
    - 支払い状態を「返金エラー」にし、注文 ID・PaymentIntent ID・エラー内容を `console.error` に出す。
@@ -185,8 +185,9 @@ Stripe での返金は外部 API 呼び出しで、DB のトランザクショ�
 
 ### `retryRefund(gateway, orderId)`
 
-- 注文を取得し、`canRetryRefund` が `false` なら `REFUND_NOT_RETRYABLE`。
-- 手順 2・3 だけを行う。冪等キーが同じなので二重返金にならない。
+- 注文を取得し、`canRetryRefund(shippingStatus, paymentStatus, paymentIntentId !== null)` が `false` なら `REFUND_NOT_RETRYABLE`。
+- 手順 2・3 だけを行う。冪等キー（`refund-{paymentIntentId}`）が同じなので二重返金にならない。キーは PaymentIntent から作る。同じ Stripe テストアカウントを共有する複数の環境で注文 ID が重なっても衝突しないようにするため。
+- 結果の書き込み（返金済み・返金エラー）の前にプロセスが落ちても、注文は「キャンセル」のまま支払い状態が残るので、管理画面から再試行して復旧できる。
 
 ### 誤操作の防止
 
@@ -204,7 +205,7 @@ Stripe での返金は外部 API 呼び出しで、DB のトランザクショ�
 - `services/admin/shippingStatusTransition.test.mts`
   - 3 状態の間は前後どちらにも変更できる
   - 同じ値への変更、キャンセルへの変更、キャンセルからの変更、未知の値は拒否する
-  - `canCancelOrder`・`canRetryRefund` の真偽
+  - `canCancelOrder`・`canRetryRefund` の真偽（`canRetryRefund` は キャンセル＋支払い済み／決済エラー／返金エラー＋決済あり で `true`、返金済み・決済なし・キャンセル以外で `false`）
 - `lib/validation.test.mts`：注文 ID・発送ステータス値・キャンセル確認チェックの検証ケースを追加する
 
 ### DB 統合テスト（`tests/integration/adminOrders.test.mts` を新設し `npm run test:integration` に追加）
@@ -219,6 +220,7 @@ Stripe での返金は外部 API 呼び出しで、DB のトランザクショ�
   - 決済ありの注文：在庫が数量分戻り、発送状態がキャンセル、支払い状態が返金済み。`refund` が冪等キー付きで 1 回だけ呼ばれる
   - 決済なしの注文：ゲートウェイを呼ばず、支払い状態は変わらない
   - 返金失敗：キャンセルと在庫戻しは確定し、支払い状態が返金エラー。`retryRefund` で返金済みになる
+  - キャンセル済みで支払い状態が「支払い済み」のまま（結果が記録されなかった）の注文も `retryRefund` で返金済みになる。決済なしの注文は `REFUND_NOT_RETRYABLE`
   - 発送済み・キャンセル済みの注文：`NOT_CANCELLABLE` で、在庫もステータスも変わらない
   - 同じ注文への同時キャンセル（`Promise.allSettled`）：1 回だけ成功し、在庫は 1 回分だけ戻る
 - `isAdmin`（`requireAdmin` が使う DB のロール確認）：顧客ユーザーは `false`、管理者は `true`、存在しないユーザーは `false`
@@ -230,7 +232,7 @@ Stripe での返金は外部 API 呼び出しで、DB のトランザクショ�
 - 顧客が注文 → 管理者が「発送準備中」に変更 → 顧客の注文詳細に反映される
 - 確認チェックなしではキャンセルできない。チェックしてキャンセルすると一覧でキャンセルと表示され、在庫が戻る（Stripe なしの注文で確認）
 - `e2e/fixtures/store.ts` に管理者のサインイン用フィクスチャを追加する
-- `prisma/reset-e2e.ts` で管理者テストが変更したデータも初期化する
+- 管理者テストが変更したデータの初期化は、後述「実装時の変更点」3 のとおり shopper フィクスチャで行う（`prisma/reset-e2e.ts` は変更しない）
 - 既存のスナップショットテストに差分がないことで、レイアウト整理後もストア側の見た目が変わっていないことを確認する
 - `test:e2e:stripe` 構成に、カード決済の注文をキャンセルして返金済みになるケースを 1 つ追加する（テストキーがあるときだけ実行）
 
@@ -247,3 +249,5 @@ Stripe での返金は外部 API 呼び出しで、DB のトランザクショ�
 3. E2E のデータの後始末は `prisma/reset-e2e.ts` ではなく shopper フィクスチャで行う。在庫を戻すときはキャンセル済みの注文を除外する（キャンセル時にすでに戻っているため）。
 4. DB 統合テストは、クエリサービスが server-only のため、`OrderRepository` を直接呼び出す。
 5. キャンセル・返金再試行のフォームは、操作できない状態でも常にマウントしたまま何も描画しない。再検証後も結果メッセージが消えないようにするため。
+6. 返金の冪等キーは `order-{id}-refund` ではなく `refund-{paymentIntentId}` とした。同じ Stripe テストアカウントを共有する複数の環境で注文 ID が衝突すると、別の支払いの返金が同じキーで再生されてしまうため。
+7. `canRetryRefund` に `hasPayment` を加え、「キャンセル かつ 決済あり かつ 返金済みでない」を再試行可能とした。キャンセル確定後に処理が落ちる、または支払い状態の書き込みに失敗すると「支払い済み」のまま残り、返金エラーの記録もないため、元の「返金エラーのみ」では復旧できなかった。あわせてチェックアウトの売上確定後の支払い状態の書き込みを「支払い待ち」のときだけ更新する条件付きにし、管理者の操作で進んだ状態を上書きしないようにした。

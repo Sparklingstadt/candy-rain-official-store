@@ -42,11 +42,11 @@ test("未サインインで管理画面を開くとサインイン画面へ移�
   await expect(page).toHaveURL(/\/signin$/)
 })
 
-test("管理者が未定義の URL を開いても、カートがなくてもエラーにならず not-found を表示する", async ({ page, admin }) => {
+test("管理者が未定義の URL を開くと、カートがなくても 404 の「ページが見つかりません」を表示する", async ({ page, admin }) => {
   await admin.signIn(page)
   const response = await page.goto("/admin/no-such-page")
   expect(response?.status()).toBe(404)
-  await expect(page.getByRole("heading", { name: /ページが見つかりません|注文が見つかりません/ })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "ページが見つかりません" })).toBeVisible()
 })
 
 test("管理者は顧客の注文を一覧と詳細で確認できる", async ({ page, shopper, admin, browser }) => {

@@ -81,9 +81,14 @@ async function main() {
     where: { id: 1 },
     data: { email: "user2@mail.com", passwordHash: demoPasswordHash }
   })
+  // Only refresh the demo admin itself; never promote whichever other user happens to hold id 2.
+  const adminSlot = await prisma.user.findUnique({ where: { id: 2 }, select: { email: true } })
+  if (adminSlot && adminSlot.email !== "admin@mail.com") {
+    throw new Error(`User id 2 is reserved for admin@mail.com but belongs to ${adminSlot.email}`)
+  }
   await prisma.user.update({
-    where: { id: 2 },
-    data: { email: "admin@mail.com", passwordHash: demoPasswordHash, role: "ADMIN" }
+    where: { id: 2, email: "admin@mail.com" },
+    data: { passwordHash: demoPasswordHash, role: "ADMIN" }
   })
   // Fill a fictional address only where none is registered, keeping addresses edited in the demo.
   await prisma.user.updateMany({

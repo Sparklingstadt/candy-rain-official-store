@@ -15,7 +15,12 @@ export async function requireUserId(){
 
 export async function requireAdmin(){
   const userId = await requireUserId()
-  if(!(await isAdmin(new UserRepository(), userId))) redirect("/products")
+  if(!(await isAdmin(new UserRepository(), userId))) {
+    // The proxy trusts the JWT role, so a token that still says ADMIN would bounce between /products and /admin.
+    // /signout is the one page it lets admins reach, which breaks the loop.
+    const session = await auth()
+    redirect(session?.user?.role === "ADMIN" ? "/signout" : "/products")
+  }
 
   return userId
 }
