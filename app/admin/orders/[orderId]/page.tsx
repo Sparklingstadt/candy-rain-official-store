@@ -12,9 +12,11 @@ import { toNonNegativeInteger } from "@/lib/validation"
 import { OrderItemRepository } from "@/repositories/implementations/orderItemRepository"
 import { OrderRepository } from "@/repositories/implementations/orderRepository"
 import { getOrderForAdmin } from "@/services/admin/adminQueryService"
-import { shippingStatuses } from "@/services/admin/shippingStatusTransition"
+import { canCancelOrder, canRetryRefund, shippingStatuses } from "@/services/admin/shippingStatusTransition"
 import { calculateSubtotal } from "@/services/checkout/orderPricing"
 import { getOrderItemsByOrderId } from "@/services/storeQueryService"
+import CancelOrderForm from "./CancelOrderForm"
+import RetryRefundButton from "./RetryRefundButton"
 import ShippingStatusForm from "./ShippingStatusForm"
 
 export async function generateMetadata({ params }: { params: Promise<{ orderId: string }> }): Promise<Metadata> {
@@ -75,7 +77,8 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
             )}
           </section>
           {currentShippingStatus && currentShippingStatus !== "キャンセル" && <ShippingStatusForm orderId={order.id} currentStatus={currentShippingStatus} />}
-          {/* Cancel and refund forms are added here by later tasks. */}
+          <CancelOrderForm orderId={order.id} canCancel={canCancelOrder(order.shippingStatus)} />
+          <RetryRefundButton orderId={order.id} canRetry={canRetryRefund(order.shippingStatus, order.paymentStatus)} />
         </div>
       </div>
     </div>

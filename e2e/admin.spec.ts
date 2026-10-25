@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test"
+import type pg from "pg"
 import { test, expect } from "./fixtures/store"
 
 type Shopper = { signIn: (page: Page) => Promise<void> }
@@ -13,6 +14,11 @@ async function placeOrderAs(shopper: Shopper, page: Page): Promise<number> {
   await page.getByRole("button", { name: "注文を確定する", exact: true }).click()
   await expect(page).toHaveURL(/\/orders\/\d+\?placed=1$/)
   return Number(new URL(page.url()).pathname.split("/").pop())
+}
+
+async function stockOfVariant(database: pg.Pool, variantId: number): Promise<number> {
+  const result = await database.query<{ stock: number }>('SELECT stock FROM "Variant" WHERE id = $1', [variantId])
+  return result.rows[0].stock
 }
 
 test("管理者はサインイン後に注文管理へ移動し、ストアのページは開けない", async ({ page, admin }) => {
@@ -76,6 +82,31 @@ test("管理者が発送ステータスを変更すると顧客の注文詳細�
     await expect(adminPage.getByText("発送ステータスを「発送準備中」に変更しました")).toBeVisible()
     await page.goto(`/orders/${orderId}`)
     await expect(page.getByRole("main")).toContainText("発送準備中")
+  } finally {
+    await adminContext.close()
+  }
+})
+
+test("確認チェックをしてキャンセルすると在庫が戻り、一覧と顧客側にキャンセルと表示される", async ({ page, shopper, admin, browser, database }) => {
+  const stockBefore = await stockOfVariant(database, 0)
+  const orderId = await placeOrderAs(shopper, page)
+  const adminContext = await browser.newContext()
+  try {
+    const adminPage = await adminContext.newPage()
+    await admin.signIn(adminPage)
+    await adminPage.goto(`/admin/orders/${orderId}`)
+    const cancel = adminPage.getByRole("button", { name: "注文をキャンセル" })
+    await expect(cancel).toBeDisabled()
+    await adminPage.getByLabel("在庫を戻し、返金することを確認しました").check()
+    await cancel.click()
+    await expect(adminPage.getByText("注文をキャンセルしました")).toBeVisible()
+    await expect(cancel).toHaveCount(0)
+    await expect(adminPage.getByLabel("発送ステータス")).toHaveCount(0)
+    expect(await stockOfVariant(database, 0)).toBe(stockBefore)
+    await adminPage.goto("/admin/orders?shippingStatus=cancelled")
+    await expect(adminPage.getByRole("row", { name: new RegExp(`#${orderId}\\b`) })).toContainText("キャンセル")
+    await page.goto(`/orders/${orderId}`)
+    await expect(page.getByRole("main")).toContainText("キャンセル")
   } finally {
     await adminContext.close()
   }
