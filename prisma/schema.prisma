@@ -25,6 +25,7 @@ model User {
   addressLine2 String?
   // Saved cards live in Stripe; only the customer reference is stored here.
   stripeCustomerId String? @unique
+  role Role @default(CUSTOMER)
   orders Order[]
   carts Cart[]
 }
@@ -37,6 +38,11 @@ model Product {
   description String
   variants Variant[]
   thumbnailImageUrl String
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
 }
 
 enum SalesType {

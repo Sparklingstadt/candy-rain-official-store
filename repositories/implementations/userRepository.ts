@@ -29,6 +29,14 @@ export class UserRepository implements IUserRepository {
     })
   }
 
+  async findRoleByUserId(userId: number) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    })
+    return user?.role ?? null
+  }
+
   async findStripeCustomerId(userId: number) {
     const user = await prisma.user.findUnique({
       where: { id: userId },

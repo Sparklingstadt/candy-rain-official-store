@@ -65,6 +65,14 @@ async function main() {
     skipDuplicates: true
   })
 
+  // The admin demo account has no cart.
+  await prisma.user.createMany({
+    data: [
+      { id: 2, email: "admin@mail.com", passwordHash: demoPasswordHash, firstName: "Admin", lastName: "Candy", role: "ADMIN" },
+    ],
+    skipDuplicates: true
+  })
+
   await prisma.user.update({
     where: { id: 0 },
     data: { email: "user1@mail.com", passwordHash: demoPasswordHash }
@@ -72,6 +80,10 @@ async function main() {
   await prisma.user.update({
     where: { id: 1 },
     data: { email: "user2@mail.com", passwordHash: demoPasswordHash }
+  })
+  await prisma.user.update({
+    where: { id: 2 },
+    data: { email: "admin@mail.com", passwordHash: demoPasswordHash, role: "ADMIN" }
   })
   // Fill a fictional address only where none is registered, keeping addresses edited in the demo.
   await prisma.user.updateMany({

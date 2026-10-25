@@ -26,7 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const user = await prisma.user.findUnique({ where: { email } })
         if (!user || !(await compare(password, user.passwordHash))) return null
 
-        return { id: String(user.id), email: user.email }
+        return { id: String(user.id), email: user.email, role: user.role }
       }
     })
   ],
@@ -37,12 +37,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     jwt({ token, user }) {
       if (user) { // User is available during sign-in
         token.id = user.id
+        token.role = user.role
       }
       return token
     },
     session({ session, token }) {
       if(token.id && session.user) {
         session.user.id = token.id
+        if (token.role) session.user.role = token.role
       }
       return session
     },
