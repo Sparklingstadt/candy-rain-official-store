@@ -1,7 +1,7 @@
 # 管理画面 ①：管理者ロール・アクセス制御・注文管理 設計
 
 - 作成日: 2026-10-25
-- 状態: レビュー待ち
+- 状態: 実装済み
 
 ## 背景と目的
 
@@ -237,3 +237,13 @@ Stripe での返金は外部 API 呼び出しで、DB のトランザクショ�
 ### 完了の条件
 
 `npm run lint`・`npm run typecheck`・`npm test`・`npm run test:integration`・`npm run test:e2e` がすべて通ること。README の機能表に管理画面を追記する。
+
+## 実装時の変更点
+
+計画・実装の過程で、仕様から次のとおり具体化・変更した。
+
+1. 発送状態の絞り込みは `?shippingStatus=<slug>` とし、slug は `unshipped`・`preparing`・`shipped`・`cancelled` を使う。
+2. 管理用 Server Action の戻り値は `FormActionState` ではなく既存の `ActionResult<{ message: string }>` にした（項目別エラーがないため）。
+3. E2E のデータの後始末は `prisma/reset-e2e.ts` ではなく shopper フィクスチャで行う。在庫を戻すときはキャンセル済みの注文を除外する（キャンセル時にすでに戻っているため）。
+4. DB 統合テストは、クエリサービスが server-only のため、`OrderRepository` を直接呼び出す。
+5. キャンセル・返金再試行のフォームは、操作できない状態でも常にマウントしたまま何も描画しない。再検証後も結果メッセージが消えないようにするため。
