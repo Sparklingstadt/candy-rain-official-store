@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { after, before, test } from "node:test"
 import { prisma } from "../../lib/prisma"
 import { OrderRepository } from "../../repositories/implementations/orderRepository"
+import { updateShippingStatus } from "../../services/admin/orderAdminService"
 import { INITIAL_PAYMENT_STATUS } from "../../services/checkout/orderStatus"
 
 // A dedicated user keeps this file independent of the seeded users that other integration files reset in parallel.
@@ -63,6 +64,10 @@ async function createOrder(input: OrderInput) {
   })
 }
 
+async function findOrder(orderId: number) {
+  return prisma.order.findUniqueOrThrow({ where: { id: orderId } })
+}
+
 test("管理者用の一覧は全ユーザーの注文を新しい順に注文者名つきで返し、発送状態で絞り込める", async () => {
   const older = await createOrder({ userId, shippingStatus: "未発送", orderedAt: new Date("2026-01-01") })
   const newer = await createOrder({ userId, shippingStatus: "発送準備中", orderedAt: new Date("2026-01-02") })
@@ -86,4 +91,20 @@ test("管理者用の詳細は所有者を問わず返し、お届け先がな�
   await prisma.user.update({ where: { id: userId }, data: { postalCode: null } })
   assert.equal((await new OrderRepository().findByIdForAdmin(order.id))?.shippingAddress, null)
   assert.equal(await new OrderRepository().findByIdForAdmin(999_999), null)
+})
+
+test("発送ステータスを変更できる", async () => {
+  const order = await createOrder({ userId, shippingStatus: "未発送" })
+  await updateShippingStatus(order.id, "未発送", "発送準備中")
+  await updateShippingStatus(order.id, "発送準備中", "発送済み")
+  await updateShippingStatus(order.id, "発送済み", "発送準備中")
+  assert.equal((await findOrder(order.id)).shippingStatus, "発送準備中")
+})
+
+test("許可されない変更・食い違い・存在しない注文はエラーにし、DB を変えない", async () => {
+  const order = await createOrder({ userId, shippingStatus: "未発送" })
+  await assert.rejects(updateShippingStatus(order.id, "未発送", "キャンセル"), { code: "INVALID_TRANSITION" })
+  await assert.rejects(updateShippingStatus(order.id, "発送準備中", "発送済み"), { code: "STALE_STATUS" })
+  await assert.rejects(updateShippingStatus(999_999, "未発送", "発送済み"), { code: "ORDER_NOT_FOUND" })
+  assert.equal((await findOrder(order.id)).shippingStatus, "未発送")
 })

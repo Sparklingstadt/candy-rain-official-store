@@ -63,6 +63,24 @@ test("管理者は顧客の注文を一覧と詳細で確認できる", async ({
   }
 })
 
+test("管理者が発送ステータスを変更すると顧客の注文詳細に反映される", async ({ page, shopper, admin, browser }) => {
+  const orderId = await placeOrderAs(shopper, page)
+  const adminContext = await browser.newContext()
+  try {
+    const adminPage = await adminContext.newPage()
+    await admin.signIn(adminPage)
+    await adminPage.goto(`/admin/orders/${orderId}`)
+    await expect(adminPage.getByRole("button", { name: "発送ステータスを変更" })).toBeDisabled()
+    await adminPage.getByLabel("発送ステータス").selectOption("発送準備中")
+    await adminPage.getByRole("button", { name: "発送ステータスを変更" }).click()
+    await expect(adminPage.getByText("発送ステータスを「発送準備中」に変更しました")).toBeVisible()
+    await page.goto(`/orders/${orderId}`)
+    await expect(page.getByRole("main")).toContainText("発送準備中")
+  } finally {
+    await adminContext.close()
+  }
+})
+
 test("不正・存在しない注文 ID は 404 になる", async ({ page, admin }) => {
   await admin.signIn(page)
   for (const id of ["abc", "-1", "999999"]) {

@@ -12,8 +12,10 @@ import { toNonNegativeInteger } from "@/lib/validation"
 import { OrderItemRepository } from "@/repositories/implementations/orderItemRepository"
 import { OrderRepository } from "@/repositories/implementations/orderRepository"
 import { getOrderForAdmin } from "@/services/admin/adminQueryService"
+import { shippingStatuses } from "@/services/admin/shippingStatusTransition"
 import { calculateSubtotal } from "@/services/checkout/orderPricing"
 import { getOrderItemsByOrderId } from "@/services/storeQueryService"
+import ShippingStatusForm from "./ShippingStatusForm"
 
 export async function generateMetadata({ params }: { params: Promise<{ orderId: string }> }): Promise<Metadata> {
   const orderId = toNonNegativeInteger((await params).orderId)
@@ -29,6 +31,7 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
   const orderItems = await getOrderItemsByOrderId(new OrderItemRepository(), orderId)
   const subTotalPrice = calculateSubtotal(orderItems.map(item => ({ price: item.priceAtPurchase, quantity: item.quantity })))
   const address = order.shippingAddress
+  const currentShippingStatus = shippingStatuses.find(status => status === order.shippingStatus)
 
   return (
     <div className="space-y-8">
@@ -71,7 +74,8 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
               <p className="text-muted-foreground">お届け先は登録されていません</p>
             )}
           </section>
-          {/* Shipping status, cancel and refund forms are added here by later tasks. */}
+          {currentShippingStatus && currentShippingStatus !== "キャンセル" && <ShippingStatusForm orderId={order.id} currentStatus={currentShippingStatus} />}
+          {/* Cancel and refund forms are added here by later tasks. */}
         </div>
       </div>
     </div>
