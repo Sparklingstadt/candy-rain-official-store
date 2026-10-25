@@ -170,7 +170,7 @@ test("管理者が価格を変えると商品ページとカートに反映さ�
   const row = page.getByRole("row", { name: /クリアファイル A/ })
   const update = row.getByRole("button", { name: "価格を更新" })
   await expect(update).toBeDisabled()
-  await row.getByLabel("クリアファイル Aの価格").fill("900")
+  await row.getByLabel("クリアファイル Aの価格", { exact: true }).fill("900")
   await update.click()
   await expect(row.getByText("価格を ¥900 に更新しました")).toBeVisible()
   expect((await readVariant(database, 1)).price).toBe(900)

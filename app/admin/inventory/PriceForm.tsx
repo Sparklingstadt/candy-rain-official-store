@@ -8,11 +8,20 @@ import { Input } from "@/components/ui/input"
 export default function PriceForm({ variantId, variantName, currentPrice }: { variantId: number, variantName: string, currentPrice: number }) {
   const [state, formAction, isPending] = useActionState(updatePriceAction, null)
   const [nextPrice, setNextPrice] = useState(String(currentPrice))
+  // The price the field was seeded from. It is submitted as currentPrice so an edit based on an outdated price is rejected (STALE_PRICE).
+  const [seedPrice, setSeedPrice] = useState(currentPrice)
+  if (currentPrice !== seedPrice) {
+    // The price changed elsewhere: follow it only while the field is untouched, otherwise keep the edit and let the server detect the stale price.
+    if (nextPrice.trim() === String(seedPrice)) setNextPrice(String(currentPrice))
+    setSeedPrice(currentPrice)
+  }
+  const trimmed = nextPrice.trim()
+  const isUnchanged = trimmed !== "" && Number(trimmed) === seedPrice
 
   return (
     <form action={formAction} className="space-y-2">
       <input type="hidden" name="variantId" value={variantId} />
-      <input type="hidden" name="currentPrice" value={currentPrice} />
+      <input type="hidden" name="currentPrice" value={seedPrice} />
       <div className="flex items-center gap-2">
         <Input
           name="nextPrice"
@@ -22,7 +31,7 @@ export default function PriceForm({ variantId, variantName, currentPrice }: { va
           onChange={event => setNextPrice(event.target.value)}
           className="w-28"
         />
-        <Button type="submit" variant="outline" disabled={isPending || nextPrice.trim() === String(currentPrice)}>{isPending ? "更新中..." : "価格を更新"}</Button>
+        <Button type="submit" variant="outline" disabled={isPending || isUnchanged} aria-label={`${variantName}の価格を更新`}>{isPending ? "更新中..." : "価格を更新"}</Button>
       </div>
       <div aria-live="polite">
         {state?.success && !isPending ? (

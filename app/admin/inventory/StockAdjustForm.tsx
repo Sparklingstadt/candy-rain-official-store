@@ -20,14 +20,13 @@ export default function StockAdjustForm({ variantId, variantName }: { variantId:
       <div className="flex items-center gap-2">
         <Input
           name="delta"
-          inputMode="numeric"
           placeholder="+10 / -3"
           aria-label={`${variantName}の在庫の増減`}
           value={delta}
           onChange={event => setDelta(event.target.value)}
           className="w-28"
         />
-        <Button type="submit" variant="outline" disabled={isPending || delta.trim() === ""}>{isPending ? "更新中..." : "在庫を更新"}</Button>
+        <Button type="submit" variant="outline" disabled={isPending || delta.trim() === ""} aria-label={`${variantName}の在庫を更新`}>{isPending ? "更新中..." : "在庫を更新"}</Button>
       </div>
       <div aria-live="polite">
         {state?.success && !isPending ? (
