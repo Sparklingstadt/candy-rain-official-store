@@ -4,7 +4,9 @@ import {
   MAX_CART_QUANTITY,
   requireCartMutationType,
   requireCartQuantity,
+  requireConfirmation,
   requireNonNegativeInteger,
+  requireShippingStatus,
   requireStripeId,
   toNonNegativeInteger,
 } from "./validation"
@@ -38,4 +40,15 @@ test("StripeのIDは指定したプレフィックスの英数字だけを受け
   assert.throws(() => requireStripeId("pi_3XyZ", "pm", "paymentMethodId"), /paymentMethodId/)
   assert.throws(() => requireStripeId("pm_../x", "pm", "paymentMethodId"), /paymentMethodId/)
   assert.throws(() => requireStripeId(undefined, "pm", "paymentMethodId"), /paymentMethodId/)
+})
+
+test("発送ステータスは定義済みの値だけ受け付ける", () => {
+  assert.equal(requireShippingStatus("発送済み", "nextStatus"), "発送済み")
+  assert.throws(() => requireShippingStatus("配達中", "nextStatus"), /nextStatus/)
+  assert.throws(() => requireShippingStatus(null, "nextStatus"), /nextStatus/)
+})
+
+test("キャンセルの確認チェックは on だけ受け付ける", () => {
+  assert.doesNotThrow(() => requireConfirmation("on"))
+  for (const value of [null, "", "off", "true"]) assert.throws(() => requireConfirmation(value), /confirmation/)
 })

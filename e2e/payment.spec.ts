@@ -82,6 +82,31 @@ test.describe("カード決済 (#14)", () => {
     await expect(page.getByText("Visa •••• 4242")).toBeVisible()
   })
 
+  test("カードで支払い済みの注文を管理者がキャンセルすると、支払い状態が返金済みになる", async ({ page, shopper, admin, browser }) => {
+    await shopper.signIn(page)
+    await addItemAndOpenCart(page)
+    await addCard(page, CARDS.visa)
+    await expect(page.getByRole("radio", { name: /Visa •••• 4242/ })).toBeChecked()
+    await page.getByRole("button", { name: "注文を確定する" }).click()
+    await expect(page).toHaveURL(/\/orders\/\d+\?placed=1$/, { timeout: 30_000 })
+    await expect(page.getByText("支払い済み", { exact: true })).toBeVisible()
+    const orderId = Number(new URL(page.url()).pathname.split("/").pop())
+
+    const adminContext = await browser.newContext()
+    try {
+      const adminPage = await adminContext.newPage()
+      await admin.signIn(adminPage)
+      await adminPage.goto(`/admin/orders/${orderId}`)
+      await adminPage.getByLabel("在庫を戻し、返金することを確認しました").check()
+      await adminPage.getByRole("button", { name: "注文をキャンセル" }).click()
+      await expect(adminPage.getByText("注文をキャンセルしました")).toBeVisible({ timeout: 30_000 })
+      await adminPage.goto(`/admin/orders/${orderId}`)
+      await expect(adminPage.getByText("返金済み", { exact: true })).toBeVisible()
+    } finally {
+      await adminContext.close()
+    }
+  })
+
   test("決済が拒否されたカードでは注文せず、カートを残す", async ({ page, shopper }) => {
     await shopper.signIn(page)
     await addItemAndOpenCart(page)
