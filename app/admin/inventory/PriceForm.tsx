@@ -10,12 +10,23 @@ export default function PriceForm({ variantId, variantName, currentPrice }: { va
   const [nextPrice, setNextPrice] = useState(String(currentPrice))
   // The price the field was seeded from. It is submitted as currentPrice so an edit based on an outdated price is rejected (STALE_PRICE).
   const [seedPrice, setSeedPrice] = useState(currentPrice)
-  if (currentPrice !== seedPrice) {
-    // The price changed elsewhere: follow it only while the field is untouched, otherwise keep the edit and let the server detect the stale price.
-    if (nextPrice.trim() === String(seedPrice)) setNextPrice(String(currentPrice))
-    setSeedPrice(currentPrice)
-  }
+  const [handledState, setHandledState] = useState(state)
   const trimmed = nextPrice.trim()
+  if (currentPrice !== seedPrice) {
+    if (trimmed === String(seedPrice)) {
+      // Untouched field: follow the new price.
+      setNextPrice(String(currentPrice))
+      setSeedPrice(currentPrice)
+    } else if (Number(trimmed) === currentPrice) {
+      // This form's own update landed.
+      setSeedPrice(currentPrice)
+    } else if (state !== handledState && state && !state.success) {
+      // The admin has just been told the price is stale and now sees the latest one, so a resubmit is deliberate.
+      setSeedPrice(currentPrice)
+    }
+    // Otherwise keep the old seed so submitting the edit is rejected as STALE_PRICE instead of silently reverting.
+  }
+  if (state !== handledState) setHandledState(state)
   const isUnchanged = trimmed !== "" && Number(trimmed) === seedPrice
 
   return (

@@ -192,6 +192,77 @@ test("管理者が価格を変えると商品ページとカートに反映さ�
   }
 })
 
+test("購入後に価格を変えても、注文には購入時の価格が残る", async ({ page, shopper, admin, browser, database, seedVariant1 }) => {
+  void seedVariant1
+  await shopper.signIn(page)
+  await page.goto("/products/1")
+  await page.getByRole("button", { name: /^クリアファイル A(?!の)/ }).click()
+  await page.getByRole("button", { name: "カートに追加" }).click()
+  await page.getByRole("link", { name: "カート(1)" }).click()
+  await page.getByRole("button", { name: "注文を確定する", exact: true }).click()
+  await expect(page).toHaveURL(/\/orders\/\d+/)
+  const orderId = Number(new URL(page.url()).pathname.split("/").at(-1))
+  const orderUrl = `/orders/${orderId}`
+
+  const adminContext = await browser.newContext()
+  try {
+    const adminPage = await adminContext.newPage()
+    await admin.signIn(adminPage)
+    await adminPage.goto("/admin/inventory")
+    const row = adminPage.getByRole("row", { name: /クリアファイル A/ })
+    await row.getByLabel("クリアファイル Aの価格", { exact: true }).fill("1200")
+    await row.getByRole("button", { name: "価格を更新" }).click()
+    await expect(row.getByText("価格を ¥1,200 に更新しました")).toBeVisible()
+    await adminPage.goto(`/admin/orders/${orderId}`)
+    await expect(adminPage.getByRole("main")).toContainText("¥800")
+    await expect(adminPage.getByRole("main")).not.toContainText("¥1,200")
+  } finally {
+    await adminContext.close()
+  }
+
+  await page.goto(orderUrl)
+  const main = page.getByRole("main")
+  await expect(main).toContainText("¥800")
+  await expect(main).toContainText("¥1,800")
+  await expect(main).not.toContainText("¥1,200")
+  const stored = await database.query<{ priceAtPurchase: number }>('SELECT "priceAtPurchase" FROM "OrderItem" WHERE "orderId" = $1', [orderId])
+  expect(stored.rows.map(row => row.priceAtPurchase)).toEqual([800])
+})
+
+test("別の管理者が先に価格を変えていたら、編集中の価格で上書きしない", async ({ page, admin, database, seedVariant1 }) => {
+  void seedVariant1
+  await admin.signIn(page)
+  await page.goto("/admin/inventory")
+  const row = page.getByRole("row", { name: /クリアファイル A/ })
+  const priceField = row.getByLabel("クリアファイル Aの価格", { exact: true })
+  const update = row.getByRole("button", { name: "価格を更新" })
+  // Another admin changes the price, then this page revalidates through a stock update in the same row.
+  const changeElsewhereAndRevalidate = async (price: number) => {
+    await database.query('UPDATE "Variant" SET price = $1 WHERE id = 1', [price])
+    await row.getByLabel("クリアファイル Aの在庫の増減").fill("+1")
+    await row.getByRole("button", { name: "在庫を更新" }).click()
+    await expect(row).toContainText(`¥${price.toLocaleString("ja-JP")}`)
+  }
+
+  // An untouched field follows the new price.
+  await changeElsewhereAndRevalidate(850)
+  await expect(priceField).toHaveValue("850")
+  await expect(update).toBeDisabled()
+
+  // An edited field keeps the edit, and submitting it is rejected instead of reverting 900.
+  await priceField.fill("1000")
+  await changeElsewhereAndRevalidate(900)
+  await expect(priceField).toHaveValue("1000")
+  await update.click()
+  await expect(row.getByText("価格が別の操作で更新されています。最新の状態を確認してください")).toBeVisible()
+  expect((await readVariant(database, 1)).price).toBe(900)
+
+  // After seeing the error, the admin can submit again on top of the latest price.
+  await update.click()
+  await expect(row.getByText("価格を ¥1,000 に更新しました")).toBeVisible()
+  expect((await readVariant(database, 1)).price).toBe(1000)
+})
+
 test("390px 幅で管理ヘッダーが横にはみ出さない", async ({ page, admin }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await admin.signIn(page)
