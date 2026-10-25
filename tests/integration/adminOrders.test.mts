@@ -1,5 +1,4 @@
 import assert from "node:assert/strict"
-import * as nodeModule from "node:module"
 import { after, before, test } from "node:test"
 import { prisma } from "../../lib/prisma"
 import { OrderRepository } from "../../repositories/implementations/orderRepository"
@@ -8,23 +7,8 @@ import { INITIAL_PAYMENT_STATUS } from "../../services/checkout/orderStatus"
 // A dedicated user keeps this file independent of the seeded users that other integration files reset in parallel.
 const userEmail = `admin-orders-${Date.now()}@example.test`
 let userId = 0
-// The installed @types/node predates module.registerHooks, so type the part we use.
-type Resolve = (specifier: string, context: object) => { url: string }
-const { registerHooks } = nodeModule as unknown as {
-  registerHooks: (hooks: { resolve: (specifier: string, context: object, nextResolve: Resolve) => { url: string, shortCircuit?: boolean } }) => void
-}
-let getOrdersForAdmin: typeof import("../../services/admin/adminQueryService").getOrdersForAdmin
-let getOrderForAdmin: typeof import("../../services/admin/adminQueryService").getOrderForAdmin
 
 before(async () => {
-  // "server-only" throws outside Next.js's react-server build, so resolve it to an empty module before the service is imported.
-  registerHooks({
-    resolve(specifier, context, nextResolve) {
-      if (specifier === "server-only") return { url: new URL("./serverOnlyStub.mts", import.meta.url).href, shortCircuit: true }
-      return nextResolve(specifier, context)
-    },
-  })
-  ;({ getOrdersForAdmin, getOrderForAdmin } = await import("../../services/admin/adminQueryService"))
   const user = await prisma.user.create({
     data: {
       email: userEmail,
@@ -82,24 +66,24 @@ async function createOrder(input: OrderInput) {
 test("管理者用の一覧は全ユーザーの注文を新しい順に注文者名つきで返し、発送状態で絞り込める", async () => {
   const older = await createOrder({ userId, shippingStatus: "未発送", orderedAt: new Date("2026-01-01") })
   const newer = await createOrder({ userId, shippingStatus: "発送準備中", orderedAt: new Date("2026-01-02") })
-  const all = await getOrdersForAdmin(new OrderRepository(), null)
+  const all = await new OrderRepository().findManyForAdmin({ shippingStatus: null })
   const ids = all.map(order => order.id)
   assert.ok(ids.indexOf(newer.id) < ids.indexOf(older.id))
   assert.equal(all.find(order => order.id === newer.id)?.customerName, "Test Hana")
 
-  const preparing = await getOrdersForAdmin(new OrderRepository(), "発送準備中")
+  const preparing = await new OrderRepository().findManyForAdmin({ shippingStatus: "発送準備中" })
   assert.ok(preparing.every(order => order.shippingStatus === "発送準備中"))
   assert.ok(preparing.some(order => order.id === newer.id))
 })
 
 test("管理者用の詳細は所有者を問わず返し、お届け先がなければ null にする", async () => {
   const order = await createOrder({ userId, shippingStatus: "未発送" })
-  const detail = await getOrderForAdmin(new OrderRepository(), order.id)
+  const detail = await new OrderRepository().findByIdForAdmin(order.id)
   assert.equal(detail?.customerEmail, userEmail)
   assert.equal(detail?.hasPayment, false)
   assert.equal(detail?.shippingAddress?.prefecture, "東京都")
 
   await prisma.user.update({ where: { id: userId }, data: { postalCode: null } })
-  assert.equal((await getOrderForAdmin(new OrderRepository(), order.id))?.shippingAddress, null)
-  assert.equal(await getOrderForAdmin(new OrderRepository(), 999_999), null)
+  assert.equal((await new OrderRepository().findByIdForAdmin(order.id))?.shippingAddress, null)
+  assert.equal(await new OrderRepository().findByIdForAdmin(999_999), null)
 })
