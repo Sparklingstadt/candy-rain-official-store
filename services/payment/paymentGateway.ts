@@ -21,4 +21,6 @@ export interface PaymentGateway {
   retrieve(paymentIntentId: string): Promise<PaymentAuthorization>
   capture(paymentIntentId: string): Promise<void>
   cancel(paymentIntentId: string): Promise<void>
+  // Gives the money back for a payment, whether it was only held or already captured. Safe to repeat with the same key.
+  refund(paymentIntentId: string, idempotencyKey: string): Promise<void>
 }

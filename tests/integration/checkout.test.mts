@@ -8,7 +8,7 @@ import { INITIAL_PAYMENT_STATUS, INITIAL_SHIPPING_STATUS } from "../../services/
 
 async function resetPurchaseData() {
   await prisma.$transaction([
-    prisma.orderItem.deleteMany(),
+    prisma.orderItem.deleteMany({ where: { order: { userId: { in: [0, 1] } } } }),
     prisma.order.deleteMany({ where: { userId: { in: [0, 1] } } }),
     prisma.cartItem.deleteMany({ where: { cart: { userId: { in: [0, 1] } } } }),
     prisma.variant.update({ where: { id: 0 }, data: { stock: 50 } }),

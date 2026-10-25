@@ -4,7 +4,7 @@ import { prisma } from "../../lib/prisma"
 import type { SavedCard } from "../../lib/cards"
 import { CheckoutError, completePaidCheckout, startPaidCheckout } from "../../services/checkout/checkoutService"
 import { PAID_PAYMENT_STATUS, PAYMENT_ERROR_STATUS } from "../../services/checkout/orderStatus"
-import type { PaymentAuthorization, PaymentGateway } from "../../services/payment/paymentGateway"
+import { FakeGateway } from "./fakeGateway.mjs"
 
 // Variant 9 is reserved for these tests so they can change its stock without
 // racing the checkout tests, which use variant 0.
@@ -12,46 +12,6 @@ const VARIANT_ID = 9
 // Unique per run because stripeCustomerId is a unique column.
 const CUSTOMER_ID = `cus_integration_${Date.now()}`
 const CARD: SavedCard = { id: "pm_visa", brand: "visa", last4: "4242", expMonth: 12, expYear: 2034 }
-
-class FakeGateway implements PaymentGateway {
-  authorizeStatus: PaymentAuthorization["status"] = "authorized"
-  captureFails = false
-  readonly payments = new Map<string, PaymentAuthorization>()
-  readonly calls: string[] = []
-
-  async createCustomer() { return CUSTOMER_ID }
-  async createCardSetup() { return { clientSecret: "seti_secret" } }
-  async listCards() { return [CARD] }
-  async findCard(customerId: string, paymentMethodId: string) {
-    return customerId === CUSTOMER_ID && paymentMethodId === CARD.id ? CARD : null
-  }
-  async removeCard() { return true }
-  async authorize({ customerId, paymentMethodId, amount }: { customerId: string, paymentMethodId: string, amount: number }) {
-    this.calls.push("authorize")
-    const payment: PaymentAuthorization = {
-      id: `pi_${this.payments.size + 1}`,
-      status: this.authorizeStatus,
-      amount,
-      customerId,
-      paymentMethodId,
-      clientSecret: "pi_secret",
-    }
-    this.payments.set(payment.id, payment)
-    return payment
-  }
-  async retrieve(paymentIntentId: string) {
-    const payment = this.payments.get(paymentIntentId)
-    if (!payment) throw new Error("No such payment")
-    return payment
-  }
-  async capture(paymentIntentId: string) {
-    this.calls.push(`capture:${paymentIntentId}`)
-    if (this.captureFails) throw new Error("capture failed")
-  }
-  async cancel(paymentIntentId: string) {
-    this.calls.push(`cancel:${paymentIntentId}`)
-  }
-}
 
 let userId: number
 let cartId: number
@@ -66,7 +26,7 @@ before(async () => {
 })
 
 beforeEach(async () => {
-  gateway = new FakeGateway()
+  gateway = new FakeGateway(CUSTOMER_ID, CARD)
   await prisma.$transaction([
     prisma.orderItem.deleteMany({ where: { order: { userId } } }),
     prisma.order.deleteMany({ where: { userId } }),

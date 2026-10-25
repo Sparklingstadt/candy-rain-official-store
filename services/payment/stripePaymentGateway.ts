@@ -106,4 +106,27 @@ export class StripePaymentGateway implements PaymentGateway {
   async cancel(paymentIntentId: string) {
     await this.stripe.paymentIntents.cancel(paymentIntentId)
   }
+
+  async refund(paymentIntentId: string, idempotencyKey: string) {
+    const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId)
+    switch (paymentIntent.status) {
+      case "requires_capture":
+        // Only held, never captured: releasing the hold returns the money.
+        await this.stripe.paymentIntents.cancel(paymentIntentId)
+        return
+      case "succeeded":
+        try {
+          await this.stripe.refunds.create({ payment_intent: paymentIntentId }, { idempotencyKey })
+        } catch (error) {
+          // A refund that already went through counts as done, so a retry after a lost response succeeds.
+          if (error instanceof Stripe.errors.StripeInvalidRequestError && error.code === "charge_already_refunded") return
+          throw error
+        }
+        return
+      case "canceled":
+        return
+      default:
+        throw new Error(`Cannot refund PaymentIntent ${paymentIntentId} in status ${paymentIntent.status}`)
+    }
+  }
 }
