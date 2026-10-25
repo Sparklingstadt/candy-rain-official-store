@@ -46,10 +46,11 @@ export async function updateShippingStatus(orderId: number, currentStatus: Shipp
 export type RefundOutcome = "none" | "refunded" | "failed"
 
 // Returns the Stripe payment to the customer and records the outcome. The idempotency key makes repeating it safe.
+// It is derived from the PaymentIntent, which is unique per Stripe account, so environments sharing one test account cannot collide on order ids.
 // The gateway is created lazily so orders without a payment can be cancelled even when Stripe is not configured.
 async function settleRefund(getGateway: () => PaymentGateway, order: { id: number, paymentIntentId: string }): Promise<"refunded" | "failed"> {
   try {
-    await getGateway().refund(order.paymentIntentId, `order-${order.id}-refund`)
+    await getGateway().refund(order.paymentIntentId, `refund-${order.paymentIntentId}`)
   } catch (error) {
     console.error("Failed to refund order", order.id, order.paymentIntentId, error)
     // A concurrent retry may have refunded in the meantime; never turn a finished refund back into an error.
@@ -101,7 +102,7 @@ export async function retryRefund(getGateway: () => PaymentGateway, orderId: num
     select: { id: true, shippingStatus: true, paymentStatus: true, paymentIntentId: true },
   })
   if (!order) throw new OrderAdminError("ORDER_NOT_FOUND", "注文が見つかりません")
-  if (!order.paymentIntentId || !canRetryRefund(order.shippingStatus, order.paymentStatus)) {
+  if (!order.paymentIntentId || !canRetryRefund(order.shippingStatus, order.paymentStatus, order.paymentIntentId !== null)) {
     throw new OrderAdminError("REFUND_NOT_RETRYABLE", "この注文は返金を再試行できません")
   }
   return { refund: await settleRefund(getGateway, { id: order.id, paymentIntentId: order.paymentIntentId }) }

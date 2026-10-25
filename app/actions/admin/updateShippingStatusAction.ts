@@ -22,7 +22,12 @@ export async function updateShippingStatusAction(_prevState: unknown, formData: 
   try {
     await updateShippingStatus(input.orderId, input.currentStatus, input.nextStatus)
   } catch (error) {
-    if (error instanceof OrderAdminError) return { success: false, message: error.message }
+    if (error instanceof OrderAdminError) {
+      // Refresh so the page shows the current state the error refers to (e.g. after a stale status).
+      revalidatePath("/admin/orders", "layout")
+      revalidatePath("/orders", "layout")
+      return { success: false, message: error.message }
+    }
     console.error(error)
     return { success: false, message: "処理に失敗しました。時間をおいてもう一度お試しください" }
   }

@@ -1,8 +1,9 @@
 import assert from "node:assert/strict"
+import { randomUUID } from "node:crypto"
 import { after, afterEach, before, beforeEach, test } from "node:test"
 import { prisma } from "../../lib/prisma"
 import { OrderRepository } from "../../repositories/implementations/orderRepository"
-import { cancelOrder, retryRefund, updateShippingStatus } from "../../services/admin/orderAdminService"
+import { OrderAdminError, cancelOrder, retryRefund, updateShippingStatus } from "../../services/admin/orderAdminService"
 import { INITIAL_PAYMENT_STATUS } from "../../services/checkout/orderStatus"
 import { FakeGateway } from "./fakeGateway.mjs"
 
@@ -85,6 +86,11 @@ async function statusesOf(orderId: number) {
   return { shippingStatus, paymentStatus }
 }
 
+// Payment intent ids are unique per run so repeated runs and other environments never share one.
+function uniquePaymentIntentId() {
+  return `pi_admin_${randomUUID()}`
+}
+
 async function stockOf(variantId: number) {
   return (await prisma.variant.findUniqueOrThrow({ where: { id: variantId } })).stock
 }
@@ -131,14 +137,15 @@ test("許可されない変更・食い違い・存在しない注文はエラ�
 })
 
 test("決済ありの注文をキャンセルすると、全明細の在庫が戻り、冪等キー付きで 1 回返金される", async () => {
-  const order = await createOrder({ userId, shippingStatus: "発送準備中", paymentStatus: "支払い済み", paymentIntentId: "pi_cancel_1",
+  const paymentIntentId = uniquePaymentIntentId()
+  const order = await createOrder({ userId, shippingStatus: "発送準備中", paymentStatus: "支払い済み", paymentIntentId,
     items: [{ variantId: 8, quantity: 2 }, { variantId: 8, quantity: 3 }] })
   const before = await stockOf(8)
   const gateway = new FakeGateway()
   assert.deepEqual(await cancelOrder(() => gateway, order.id), { refund: "refunded" })
   assert.equal(await stockOf(8), before + 5)
   assert.deepEqual(await statusesOf(order.id), { shippingStatus: "キャンセル", paymentStatus: "返金済み" })
-  assert.deepEqual(gateway.refunds, [{ paymentIntentId: "pi_cancel_1", idempotencyKey: `order-${order.id}-refund` }])
+  assert.deepEqual(gateway.refunds, [{ paymentIntentId, idempotencyKey: `refund-${paymentIntentId}` }])
 })
 
 test("決済なしの注文はゲートウェイを呼ばず、支払い状態を変えない", async () => {
@@ -149,7 +156,8 @@ test("決済なしの注文はゲートウェイを呼ばず、支払い状態�
 })
 
 test("返金に失敗してもキャンセルは確定し、返金エラーから再試行できる", async () => {
-  const order = await createOrder({ userId, shippingStatus: "未発送", paymentStatus: "支払い済み", paymentIntentId: "pi_cancel_2", items: [{ variantId: 8, quantity: 1 }] })
+  const paymentIntentId = uniquePaymentIntentId()
+  const order = await createOrder({ userId, shippingStatus: "未発送", paymentStatus: "支払い済み", paymentIntentId, items: [{ variantId: 8, quantity: 1 }] })
   const before = await stockOf(8)
   const gateway = new FakeGateway()
   gateway.refundFails = true
@@ -160,7 +168,7 @@ test("返金に失敗してもキャンセルは確定し、返金エラーか�
   gateway.refundFails = false
   assert.deepEqual(await retryRefund(() => gateway, order.id), { refund: "refunded" })
   assert.equal((await statusesOf(order.id)).paymentStatus, "返金済み")
-  assert.equal(gateway.refunds.at(-1)?.idempotencyKey, `order-${order.id}-refund`)
+  assert.equal(gateway.refunds.at(-1)?.idempotencyKey, `refund-${paymentIntentId}`)
   await assert.rejects(retryRefund(() => gateway, order.id), { code: "REFUND_NOT_RETRYABLE" })
 })
 
@@ -180,5 +188,23 @@ test("同じ注文への同時キャンセルは 1 回だけ成功し、在庫�
   const before = await stockOf(8)
   const results = await Promise.allSettled([1, 2, 3].map(() => cancelOrder(() => new FakeGateway(), order.id)))
   assert.equal(results.filter(result => result.status === "fulfilled").length, 1)
+  for (const result of results) {
+    if (result.status !== "rejected") continue
+    assert.ok(result.reason instanceof OrderAdminError, String(result.reason))
+    assert.equal(result.reason.code, "NOT_CANCELLABLE")
+  }
   assert.equal(await stockOf(8), before + 4)
+})
+
+test("キャンセル後に返金結果が記録されなかった注文（支払い済みのまま）も返金を再試行でき、決済のない注文は再試行できない", async () => {
+  const paymentIntentId = uniquePaymentIntentId()
+  const order = await createOrder({ userId, shippingStatus: "キャンセル", paymentStatus: "支払い済み", paymentIntentId })
+  const gateway = new FakeGateway()
+  assert.deepEqual(await retryRefund(() => gateway, order.id), { refund: "refunded" })
+  assert.deepEqual(await statusesOf(order.id), { shippingStatus: "キャンセル", paymentStatus: "返金済み" })
+  assert.deepEqual(gateway.refunds, [{ paymentIntentId, idempotencyKey: `refund-${paymentIntentId}` }])
+
+  const withoutPayment = await createOrder({ userId, shippingStatus: "キャンセル", paymentStatus: "支払い待ち" })
+  await assert.rejects(retryRefund(() => gateway, withoutPayment.id), { code: "REFUND_NOT_RETRYABLE" })
+  assert.equal(gateway.refunds.length, 1)
 })

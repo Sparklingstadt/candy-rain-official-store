@@ -57,7 +57,9 @@ export class OrderRepository implements IOrderRepository {
   async findByIdForAdmin(orderId: number): Promise<AdminOrderDetail | null> {
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: { user: true },
+      include: {
+        user: { select: { firstName: true, lastName: true, email: true, postalCode: true, prefecture: true, addressLine1: true, addressLine2: true } },
+      },
     })
     if (!order) return null
 

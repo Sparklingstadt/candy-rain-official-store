@@ -2,7 +2,7 @@ import {
   CANCELLED_SHIPPING_STATUS,
   INITIAL_SHIPPING_STATUS,
   PREPARING_SHIPPING_STATUS,
-  REFUND_ERROR_PAYMENT_STATUS,
+  REFUNDED_PAYMENT_STATUS,
   SHIPPED_SHIPPING_STATUS,
 } from "../checkout/orderStatus"
 
@@ -47,7 +47,8 @@ export function canCancelOrder(shippingStatus: string): boolean {
   return cancellable.has(shippingStatus)
 }
 
-// A failed refund of a cancelled order can be retried; the payment status carries the refund outcome.
-export function canRetryRefund(shippingStatus: string, paymentStatus: string): boolean {
-  return shippingStatus === CANCELLED_SHIPPING_STATUS && paymentStatus === REFUND_ERROR_PAYMENT_STATUS
+// A cancelled order with a payment can be refunded again until it is recorded as refunded. This covers a failed refund
+// and also a cancellation whose process died (or whose status write failed) before the refund outcome was saved.
+export function canRetryRefund(shippingStatus: string, paymentStatus: string, hasPayment: boolean): boolean {
+  return shippingStatus === CANCELLED_SHIPPING_STATUS && hasPayment && paymentStatus !== REFUNDED_PAYMENT_STATUS
 }

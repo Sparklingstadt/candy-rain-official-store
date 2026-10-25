@@ -1,7 +1,7 @@
 "use client"
 import { cancelOrderAction } from "@/app/actions/admin/cancelOrderAction"
 import { useActionState, useState } from "react"
-import { CircleCheck } from "lucide-react"
+import { CircleAlert, CircleCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 // Stays mounted after a successful cancellation so the result message survives the page refresh; only the controls go away.
@@ -24,10 +24,13 @@ export default function CancelOrderForm({ orderId, canCancel }: { orderId: numbe
         </>
       ) : null}
       <div aria-live="polite">
-        {state?.success && !isPending ? (
+        {state?.success && !state.warning && !isPending ? (
           <p className="flex items-center gap-2 bg-candy-mint px-4 py-3 text-sm font-medium text-candy-mint-foreground"><CircleCheck className="size-4 shrink-0" />{state.message}</p>
         ) : null}
       </div>
+      {state?.success && state.warning && !isPending ? (
+        <p role="alert" className="flex items-center gap-2 border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive"><CircleAlert className="size-4 shrink-0" />{state.message}</p>
+      ) : null}
       {state && !state.success ? <p role="alert" className="text-sm text-destructive">{state.message}</p> : null}
     </form>
   )

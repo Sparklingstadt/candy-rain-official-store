@@ -78,7 +78,7 @@ export default async function Page({ params }: { params: Promise<{ orderId: stri
           </section>
           {currentShippingStatus && currentShippingStatus !== "キャンセル" && <ShippingStatusForm orderId={order.id} currentStatus={currentShippingStatus} />}
           <CancelOrderForm orderId={order.id} canCancel={canCancelOrder(order.shippingStatus)} />
-          <RetryRefundButton orderId={order.id} canRetry={canRetryRefund(order.shippingStatus, order.paymentStatus)} />
+          <RetryRefundButton orderId={order.id} canRetry={canRetryRefund(order.shippingStatus, order.paymentStatus, order.hasPayment)} />
         </div>
       </div>
     </div>

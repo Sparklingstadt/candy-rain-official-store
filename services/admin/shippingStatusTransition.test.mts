@@ -38,10 +38,15 @@ test("発送ステータスの一覧は4つの定義済み値", () => {
   assert.deepEqual([...shippingStatuses], ["未発送", "発送準備中", "発送済み", "キャンセル"])
 })
 
-test("返金の再試行はキャンセル済みかつ返金エラーのときだけ", () => {
-  assert.equal(canRetryRefund("キャンセル", "返金エラー"), true)
-  assert.equal(canRetryRefund("キャンセル", "返金済み"), false)
-  assert.equal(canRetryRefund("未発送", "返金エラー"), false)
+test("返金の再試行は、決済のあるキャンセル済み注文で返金済みになるまで可能", () => {
+  assert.equal(canRetryRefund("キャンセル", "支払い済み", true), true)
+  assert.equal(canRetryRefund("キャンセル", "決済エラー", true), true)
+  assert.equal(canRetryRefund("キャンセル", "返金エラー", true), true)
+  assert.equal(canRetryRefund("キャンセル", "返金済み", true), false)
+  assert.equal(canRetryRefund("キャンセル", "返金エラー", false), false)
+  assert.equal(canRetryRefund("キャンセル", "支払い待ち", false), false)
+  assert.equal(canRetryRefund("未発送", "返金エラー", true), false)
+  assert.equal(canRetryRefund("発送済み", "支払い済み", true), false)
 })
 
 test("絞り込みの slug を解決し、未知の値は絞り込みなしにする", () => {

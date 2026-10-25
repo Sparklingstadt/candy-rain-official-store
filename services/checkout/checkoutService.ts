@@ -184,6 +184,7 @@ export async function completePaidCheckout(gateway: PaymentGateway, userId: numb
     console.error("Failed to capture payment", paymentIntentId, error)
     paymentStatus = PAYMENT_ERROR_STATUS
   }
-  await prisma.order.update({ where: { id: orderId }, data: { paymentStatus } })
+  // Conditional so a payment status an admin already moved on (e.g. a cancellation refund) is never overwritten.
+  await prisma.order.updateMany({ where: { id: orderId, paymentStatus: INITIAL_PAYMENT_STATUS }, data: { paymentStatus } })
   return orderId
 }
