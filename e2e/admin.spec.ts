@@ -126,81 +126,69 @@ async function readVariant(database: pg.Pool, variantId: number): Promise<{ stoc
   return result.rows[0]
 }
 
-async function restoreVariant(database: pg.Pool, variantId: number, original: { stock: number, price: number }) {
-  await database.query('UPDATE "Variant" SET stock = $2, price = $3 WHERE id = $1', [variantId, original.stock, original.price])
-}
-
 test("顧客は在庫・価格の画面を開けない", async ({ page, shopper }) => {
   await shopper.signIn(page)
   await page.goto("/admin/inventory")
   await expect(page).toHaveURL(/\/products$/)
 })
 
-test("管理者が在庫を増やすと売り切れが解除される。0 未満の減算は拒否される", async ({ page, shopper, admin, browser, database }) => {
-  const original = await readVariant(database, 1)
+test("管理者が在庫を増やすと売り切れが解除される。0 未満の減算は拒否される", async ({ page, shopper, admin, browser, database, seedVariant1 }) => {
+  void seedVariant1
   await database.query('UPDATE "Variant" SET stock = 0 WHERE id = 1')
-  try {
-    await admin.signIn(page)
-    await page.getByRole("link", { name: "在庫・価格" }).click()
-    await expect(page).toHaveURL(/\/admin\/inventory$/)
-    const row = page.getByRole("row", { name: /クリアファイル A/ })
-    await expect(row).toContainText("売り切れ")
-    await row.getByLabel("クリアファイル Aの在庫の増減").fill("-1")
-    await row.getByRole("button", { name: "在庫を更新" }).click()
-    await expect(row.getByText("在庫が足りないため減らせません（現在の在庫: 0）")).toBeVisible()
-    expect((await readVariant(database, 1)).stock).toBe(0)
-    await row.getByLabel("クリアファイル Aの在庫の増減").fill("+5")
-    await row.getByRole("button", { name: "在庫を更新" }).click()
-    await expect(row.getByText("在庫を 5 に更新しました")).toBeVisible()
-    await expect(row).not.toContainText("売り切れ")
-    expect((await readVariant(database, 1)).stock).toBe(5)
+  await admin.signIn(page)
+  await page.getByRole("link", { name: "在庫・価格" }).click()
+  await expect(page).toHaveURL(/\/admin\/inventory$/)
+  const row = page.getByRole("row", { name: /クリアファイル A/ })
+  await expect(row).toContainText("売り切れ")
+  await row.getByLabel("クリアファイル Aの在庫の増減").fill("-1")
+  await row.getByRole("button", { name: "在庫を更新" }).click()
+  await expect(row.getByText("在庫が足りないため減らせません（現在の在庫: 0）")).toBeVisible()
+  expect((await readVariant(database, 1)).stock).toBe(0)
+  await row.getByLabel("クリアファイル Aの在庫の増減").fill("+5")
+  await row.getByRole("button", { name: "在庫を更新" }).click()
+  await expect(row.getByText("在庫を 5 に更新しました")).toBeVisible()
+  await expect(row).not.toContainText("売り切れ")
+  expect((await readVariant(database, 1)).stock).toBe(5)
 
-    const shopperContext = await browser.newContext()
-    try {
-      const shopperPage = await shopperContext.newPage()
-      await shopper.signIn(shopperPage)
-      await shopperPage.goto("/products/1")
-      const variantButton = shopperPage.getByRole("button", { name: /^クリアファイル A(?!の)/ })
-      await expect(variantButton).toBeEnabled()
-      await expect(variantButton).not.toContainText("売り切れ")
-    } finally {
-      await shopperContext.close()
-    }
+  const shopperContext = await browser.newContext()
+  try {
+    const shopperPage = await shopperContext.newPage()
+    await shopper.signIn(shopperPage)
+    await shopperPage.goto("/products/1")
+    const variantButton = shopperPage.getByRole("button", { name: /^クリアファイル A(?!の)/ })
+    await expect(variantButton).toBeEnabled()
+    await expect(variantButton).not.toContainText("売り切れ")
   } finally {
-    await restoreVariant(database, 1, original)
+    await shopperContext.close()
   }
 })
 
-test("管理者が価格を変えると商品ページとカートに反映される", async ({ page, shopper, admin, browser, database }) => {
-  const original = await readVariant(database, 1)
-  try {
-    await admin.signIn(page)
-    await page.goto("/admin/inventory")
-    const row = page.getByRole("row", { name: /クリアファイル A/ })
-    const update = row.getByRole("button", { name: "価格を更新" })
-    await expect(update).toBeDisabled()
-    await row.getByLabel("クリアファイル Aの価格").fill("900")
-    await update.click()
-    await expect(row.getByText("価格を ¥900 に更新しました")).toBeVisible()
-    expect((await readVariant(database, 1)).price).toBe(900)
+test("管理者が価格を変えると商品ページとカートに反映される", async ({ page, shopper, admin, browser, database, seedVariant1 }) => {
+  void seedVariant1
+  await admin.signIn(page)
+  await page.goto("/admin/inventory")
+  const row = page.getByRole("row", { name: /クリアファイル A/ })
+  const update = row.getByRole("button", { name: "価格を更新" })
+  await expect(update).toBeDisabled()
+  await row.getByLabel("クリアファイル Aの価格").fill("900")
+  await update.click()
+  await expect(row.getByText("価格を ¥900 に更新しました")).toBeVisible()
+  expect((await readVariant(database, 1)).price).toBe(900)
 
-    const shopperContext = await browser.newContext()
-    try {
-      const shopperPage = await shopperContext.newPage()
-      await shopper.signIn(shopperPage)
-      await shopperPage.goto("/products/1")
-      const variantButton = shopperPage.getByRole("button", { name: /^クリアファイル A(?!の)/ })
-      await expect(variantButton).toContainText("¥900")
-      await variantButton.click()
-      await shopperPage.getByRole("button", { name: "カートに追加" }).click()
-      await expect(shopperPage.getByRole("link", { name: "カート(1)" })).toBeVisible()
-      await shopperPage.getByRole("link", { name: "カート(1)" }).click()
-      await expect(shopperPage.getByText("¥900").first()).toBeVisible()
-    } finally {
-      await shopperContext.close()
-    }
+  const shopperContext = await browser.newContext()
+  try {
+    const shopperPage = await shopperContext.newPage()
+    await shopper.signIn(shopperPage)
+    await shopperPage.goto("/products/1")
+    const variantButton = shopperPage.getByRole("button", { name: /^クリアファイル A(?!の)/ })
+    await expect(variantButton).toContainText("¥900")
+    await variantButton.click()
+    await shopperPage.getByRole("button", { name: "カートに追加" }).click()
+    await expect(shopperPage.getByRole("link", { name: "カート(1)" })).toBeVisible()
+    await shopperPage.getByRole("link", { name: "カート(1)" }).click()
+    await expect(shopperPage.getByText("¥900").first()).toBeVisible()
   } finally {
-    await restoreVariant(database, 1, original)
+    await shopperContext.close()
   }
 })
 
