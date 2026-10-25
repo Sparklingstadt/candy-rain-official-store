@@ -1,3 +1,5 @@
+import { shippingStatuses, type ShippingStatus } from "../services/admin/shippingStatusTransition"
+
 export const MAX_CART_QUANTITY = 99
 
 // A cart line can never exceed the variant's stock or the per-line limit.
@@ -39,4 +41,15 @@ export function requireStripeId(value: unknown, prefix: "pm" | "pi", fieldName: 
     throw new Error(`${fieldName} must be a Stripe ${prefix}_ ID`)
   }
   return value
+}
+
+export function requireShippingStatus(value: unknown, fieldName: string): ShippingStatus {
+  const status = shippingStatuses.find(candidate => candidate === value)
+  if (status === undefined) throw new Error(`${fieldName} must be a known shipping status`)
+  return status
+}
+
+// Checkbox confirmation for irreversible admin actions; an unchecked box is never submitted, and a checked one sends "on".
+export function requireConfirmation(value: unknown) {
+  if (value !== "on") throw new Error("confirmation is required")
 }
