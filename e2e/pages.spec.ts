@@ -70,4 +70,13 @@ test.describe("ページ表示 (#4)", () => {
     await page.getByRole("link", { name: "注文一覧へ戻る" }).click()
     await expect(page.getByRole("heading", { name: "注文履歴" })).toBeVisible()
   })
+
+  test("404 はストアのヘッダー付きで表示される", async ({ page, shopper }) => {
+    await shopper.signIn(page)
+    for (const path of ["/no-such-page", "/products/999999"]) {
+      await page.goto(path)
+      await expect(page.getByRole("heading", { name: "ページが見つかりません", exact: true })).toBeVisible()
+      await expect(page.getByRole("navigation", { name: "メインナビゲーション" })).toBeVisible()
+    }
+  })
 })
