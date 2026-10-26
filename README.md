@@ -136,6 +136,15 @@ main への push では、2つの検証ジョブと `CI passed` の成功後に 
 
 本番は [Vercel](https://candy-rain-store.vercel.app) で公開しています。通常のビルドは DB を更新しません。DB の migration は対象の `DATABASE_URL` を確認して `npm run db:migrate` を実行するか、[Migrate production database](.github/workflows/migrate-production.yml) を手動実行します。後者では GitHub の `production` Environment に `DATABASE_URL` secret を設定します。
 
+管理画面で登録できる商品は 30 件までで、物理削除の画面はありません。公開デモで上限に達した場合は、注文に使われていない登録商品（ID 5 以上）を次のコマンドで削除できます。既定は対象の一覧を表示するだけで、`--apply` を付けたときだけ削除します。注文履歴のある商品とシードの商品（ID 0〜4）は削除しません。
+
+```bash
+npm run db:cleanup-demo-products            # 接続先と削除対象を表示する（削除しない）
+npm run db:cleanup-demo-products -- --apply # 削除する
+```
+
+実行前に、表示される接続先が意図した DB（公開デモの DB など）であることを確認してください。削除は元に戻せません。
+
 ページ表示・商品操作・desktop/mobile の ARIA スナップショットの対象と更新手順は [E2E テストガイド](e2e/README.md) を参照してください。
 
 ## 今後の課題
