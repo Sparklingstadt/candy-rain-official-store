@@ -1,7 +1,7 @@
 # 管理画面 ③：商品の登録・編集 設計
 
 - 作成日: 2026-10-26
-- 状態: 設計承認済み（未実装）
+- 状態: 実装済み
 - 前提: [管理画面 ①](2026-10-25-admin-orders-design.md)・[管理画面 ②](2026-10-26-admin-inventory-design.md) が main に入っていること
 
 ## 背景と目的
@@ -235,3 +235,12 @@ E2E で作成した商品は fixture のティアダウンで削除する。加�
 ### 完了の条件
 
 `npm run lint`・`npm run typecheck`・`npm test`・`npm run test:integration`・`npm run test:e2e` がすべて通ること。README の機能表の「管理画面」行に商品の登録・編集と公開設定を追記する。
+
+## 実装時の変更点
+
+- 項目ごとの入力検証は `lib/validation.ts` ではなく `lib/productValidation.ts` に置いた（プロフィールの検証と同じ形）。共通の補助関数は `lib/formParsing.ts` に移した。`lib/validation.ts` には `requirePublishedFlag` だけを追加した。
+- 件数の確認と作成を 1 トランザクションにするため、Repository の作成メソッドは上限を受け取る `createWithinLimit`（上限に達していれば `null`）にした。`count()` / `countByProductId()` は使う箇所がないため作らなかった。
+- 画像の選択肢のラベルは、商品画像を「{商品名}（商品画像）」、バリエーション画像をバリエーション名にした（ラジオボタンのアクセシブルネームが重複しないように）。登録フォームは画像を未選択の状態で始める。
+- 商品・バリエーションが見つからないときは `app/admin/products/not-found.tsx`（「商品が見つかりません」）を表示する。
+- カートでは非公開の商品名をリンクにしない（商品ページが 404 になるため）。
+- E2E は `e2e/adminProducts.spec.ts` に置いた。390px 幅の確認は既存のテストに `/admin/products` を加えた。

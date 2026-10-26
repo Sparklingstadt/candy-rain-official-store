@@ -7,6 +7,10 @@ async function resetE2eData() {
     prisma.cartItem.deleteMany({ where: { cart: { userId: 0 } } }),
     prisma.variant.update({ where: { id: 0 }, data: { stock: 50 } }),
     prisma.variant.update({ where: { id: 1 }, data: { stock: 50, price: 800 } }),
+    // Products registered through the admin screens (anything beyond the seeded IDs 0-4).
+    prisma.cartItem.deleteMany({ where: { variant: { productId: { gte: 5 } } } }),
+    prisma.variant.deleteMany({ where: { productId: { gte: 5 } } }),
+    prisma.product.deleteMany({ where: { id: { gte: 5 } } }),
   ])
 }
 

@@ -23,7 +23,8 @@ export default function ImagePicker({ name, legend, selected, error }: {
               error && "border-destructive",
             )}
           >
-            <input type="radio" name={name} value={image.url} defaultChecked={image.url === selected} className="sr-only" />
+            {/* Transparent but covering the whole card, so the radio itself receives clicks and keyboard focus. */}
+            <input type="radio" name={name} value={image.url} defaultChecked={image.url === selected} className="absolute inset-0 z-10 size-full cursor-pointer appearance-none opacity-0" />
             <span className="relative aspect-square w-full overflow-hidden bg-candy-lemon">
               <Image src={image.url} alt="" fill className="object-cover" sizes="120px" />
             </span>
