@@ -64,7 +64,17 @@ test("管理者は /admin とロゴのリンクからダッシュボードを開
   await expect(page.getByRole("heading", { name: "ダッシュボード", exact: true })).toBeVisible()
 })
 
-test("表示される数が DB の集計と一致する", async ({ page, admin, database }) => {
+test("表示される数が DB の集計と一致する", async ({ page, admin, shopper, database }) => {
+  // Orders on both sides of Japan-time midnight (and a cancelled one) make today and this month differ, so swapped
+  // or UTC-based boundaries would show the wrong figures. The shopper fixture deletes these orders afterwards.
+  const insert = (orderedAt: string, totalPrice: number, shippingStatus = "未発送") => database.query(
+    `INSERT INTO "Order" ("userId", "paymentStatus", "shippingStatus", "shippingPrice", "totalPrice", "orderedAt")
+     VALUES ($1, '支払い待ち', $2, 1000, $3, ${orderedAt})`, [shopper.id, shippingStatus, totalPrice])
+  await insert(`${tokyoStart("day")} + interval '1 second'`, 1111)
+  await insert(`${tokyoStart("day")} - interval '1 second'`, 2222)
+  await insert(`${tokyoStart("day")} + interval '2 seconds'`, 4444, "キャンセル")
+  const isFirstOfMonth = (await count(database, `SELECT (${tokyoStart("day")} = ${tokyoStart("month")})::int`)) === 1
+
   await admin.signIn(page)
   const listed = `p."isPublished" AND EXISTS (SELECT 1 FROM "Variant" v WHERE v."productId" = p.id AND v."isPublished")`
   const expected = {
@@ -79,6 +89,9 @@ test("表示される数が DB の集計と一致する", async ({ page, admin, 
   }
   const today = await salesSince(database, "day")
   const month = await salesSince(database, "month")
+  // The order just before midnight belongs to yesterday, so the month total exceeds today's (except on the 1st).
+  if (!isFirstOfMonth) expect(month.total).toBeGreaterThan(today.total)
+  expect(today.orders).toBeGreaterThan(0)
 
   await page.goto("/admin/dashboard")
   expect(await stat(page, "対応待ち", "未発送")).toBe(`${expected.unshipped} 件`)
