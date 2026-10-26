@@ -3,6 +3,8 @@ import { removeCartItemAction } from "@/app/actions/removeCartItemAction"
 import Image from "next/image"
 import Link from "next/link"
 import { getVariantImageUrl } from "@/lib/product-images"
+import { isOnSale } from "@/lib/availability"
+import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/format"
 import { CartItemRow } from "./CartItemRow"
 import { CartItemWithVariant } from "@/lib/types"
@@ -19,7 +21,12 @@ function CartItemProduct({ cartItem, detail }: { cartItem: CartItemWithVariant; 
         <Image src={getVariantImageUrl(cartItem.variant)} alt="" fill className="object-cover grayscale" sizes="56px" />
       </span>
       <div className="min-w-0">
-        <Link href={`/products/${cartItem.variant.productId}`} className="font-medium underline-offset-4 hover:underline">{cartItem.variant.name}</Link>
+        {isOnSale(cartItem.variant) ? (
+          <Link href={`/products/${cartItem.variant.productId}`} className="font-medium underline-offset-4 hover:underline">{cartItem.variant.name}</Link>
+        ) : (
+          // The product page is no longer available, so show the name without a link.
+          <span className="flex flex-wrap items-center gap-2 font-medium">{cartItem.variant.name}<Badge variant="destructive">販売停止</Badge></span>
+        )}
         {detail}
       </div>
     </div>

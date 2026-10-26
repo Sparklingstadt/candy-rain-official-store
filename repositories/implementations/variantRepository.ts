@@ -3,7 +3,7 @@ import { IVariantRepository } from "../interfaces/IVariantRepository"
 
 export class VariantRepository implements IVariantRepository {
   async findManyByProductId(productId: number) {
-    return await prisma.variant.findMany({ where: { productId }, orderBy: { id: "asc" } })
+    return await prisma.variant.findMany({ where: { productId, isPublished: true }, orderBy: { id: "asc" } })
   }
 
   // One conditional UPDATE, like the purchase decrement, so concurrent changes are neither lost nor take the stock below zero.

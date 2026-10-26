@@ -23,7 +23,7 @@ export type CartItemWithVariant = {
   cartId: number,
   variantId: number,
   quantity: number,
-  variant: Variant,
+  variant: Variant & { isPublished: boolean, product: { isPublished: boolean } },
 }
 
 // Return shape shared by Server Actions; expected failures carry a message for the UI.
