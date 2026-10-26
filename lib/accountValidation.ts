@@ -1,4 +1,7 @@
 import { isPrefecture, type Prefecture } from "./prefectures"
+import { readText, textError, toResult, type FormValues, type ParseResult } from "./formParsing"
+
+export type { ParseResult }
 
 export const MAX_NAME_LENGTH = 50
 export const MAX_ADDRESS_LINE_LENGTH = 100
@@ -13,31 +16,6 @@ export type ShippingAddressInput = {
 
 export type ProfileField = keyof ProfileInput
 export type ShippingAddressField = keyof ShippingAddressInput
-
-// values echoes the normalized input so the form can show it again next to the errors.
-export type ParseResult<F extends string, T> =
-  | { success: true, data: T }
-  | { success: false, fieldErrors: Partial<Record<F, string>>, values: Record<F, string> }
-
-type FormValues = { get(name: string): unknown }
-
-// NFKC turns full-width digits, letters and hyphens into their ASCII forms.
-function readText(form: FormValues, name: string) {
-  const value = form.get(name)
-  return typeof value === "string" ? value.normalize("NFKC").trim() : ""
-}
-
-function textError(value: string, label: string, maxLength: number, required: boolean) {
-  if (!value) return required ? `${label}を入力してください` : undefined
-  if (/\p{Cc}/u.test(value)) return `${label}に使用できない文字が含まれています`
-  if ([...value].length > maxLength) return `${label}は${maxLength}文字以内で入力してください`
-  return undefined
-}
-
-function toResult<F extends string, T>(values: Record<F, string>, fieldErrors: Partial<Record<F, string | undefined>>, data: () => T): ParseResult<F, T> {
-  const errors = Object.fromEntries(Object.entries(fieldErrors).filter(([, error]) => error)) as Partial<Record<F, string>>
-  return Object.keys(errors).length > 0 ? { success: false, fieldErrors: errors, values } : { success: true, data: data() }
-}
 
 export function parseProfileInput(form: FormValues): ParseResult<ProfileField, ProfileInput> {
   const values = { firstName: readText(form, "firstName"), lastName: readText(form, "lastName") }

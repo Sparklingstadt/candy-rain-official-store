@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import {
   MAX_CART_QUANTITY,
+  requirePublishedFlag,
   requireCartMutationType,
   requireCartQuantity,
   requireConfirmation,
@@ -72,4 +73,10 @@ test("価格は 1〜9,999,999 の整数を受け付ける", () => {
   for (const value of ["0", "-1", "10000000", "1.5", "", null, "abc"]) {
     assert.throws(() => requirePrice(value), /price/, String(value))
   }
+})
+
+test("requirePublishedFlag は true / false だけを受け付ける", () => {
+  assert.equal(requirePublishedFlag("true"), true)
+  assert.equal(requirePublishedFlag("false"), false)
+  for (const value of ["on", "", null]) assert.throws(() => requirePublishedFlag(value))
 })

@@ -79,3 +79,10 @@ export function requirePrice(value: unknown) {
   }
   return price
 }
+
+// Publish buttons send the target state, so a double submit or a concurrent change still ends as the button said.
+export function requirePublishedFlag(value: unknown) {
+  if (value === "true") return true
+  if (value === "false") return false
+  throw new Error("published must be true or false")
+}
