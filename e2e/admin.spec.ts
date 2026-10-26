@@ -21,14 +21,14 @@ async function stockOfVariant(database: pg.Pool, variantId: number): Promise<num
   return result.rows[0].stock
 }
 
-test("管理者はサインイン後に注文管理へ移動し、ストアのページは開けない", async ({ page, admin }) => {
+test("管理者はサインイン後にダッシュボードへ移動し、ストアのページは開けない", async ({ page, admin }) => {
   await admin.signIn(page)
-  await expect(page).toHaveURL(/\/admin\/orders$/)
-  await expect(page.getByRole("heading", { name: "注文管理", exact: true })).toBeVisible()
+  await expect(page).toHaveURL(/\/admin\/dashboard$/)
+  await expect(page.getByRole("heading", { name: "ダッシュボード", exact: true })).toBeVisible()
   await page.goto("/products")
-  await expect(page).toHaveURL(/\/admin\/orders$/)
+  await expect(page).toHaveURL(/\/admin\/dashboard$/)
   await page.goto("/signin")
-  await expect(page).toHaveURL(/\/admin\/orders$/)
+  await expect(page).toHaveURL(/\/admin\/dashboard$/)
 })
 
 test("顧客は管理画面を開けない", async ({ page, shopper }) => {

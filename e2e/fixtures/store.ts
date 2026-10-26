@@ -39,7 +39,7 @@ export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.P
       await page.getByLabel("メールアドレス", { exact: true }).fill(email)
       await page.getByLabel("パスワード", { exact: true }).fill("demo-password")
       await page.getByRole("button", { name: "サインイン", exact: true }).click()
-      await expect(page).toHaveURL(/\/admin\/orders$/)
+      await expect(page).toHaveURL(/\/admin\/dashboard$/)
     } })
   },
   shopper: async ({ database }, provide) => {
