@@ -37,6 +37,8 @@ test("DB URLs from the selectable catalog take precedence over the mapping", () 
 
 test("the catalog lists 15 images that exist in public and matches URLs exactly", () => {
   assert.equal(productImageCatalog.length, 15)
+  // Labels are the radio buttons' accessible names, so they must be unique.
+  assert.equal(new Set(productImageCatalog.map(image => image.label)).size, 15)
   for (const image of productImageCatalog) {
     assert.ok(image.label)
     assert.ok(existsSync(new URL("../public" + image.url, import.meta.url)))

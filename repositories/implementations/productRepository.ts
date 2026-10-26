@@ -34,10 +34,6 @@ export class ProductRepository implements IProductRepository {
     })
   }
 
-  async count() {
-    return await prisma.product.count()
-  }
-
   // Counting and creating share a transaction; a concurrent create may still pass the limit by one, which is acceptable for the demo.
   async createWithinLimit(input: ProductInput, limit: number) {
     return await prisma.$transaction(async tx => {

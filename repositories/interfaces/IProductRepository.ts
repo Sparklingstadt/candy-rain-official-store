@@ -9,7 +9,6 @@ export interface IProductRepository {
   // Admin reads return every product and variant.
   findManyForAdmin(): Promise<ProductForAdmin[]>
   findByIdForAdmin(productId: number): Promise<ProductForAdmin | null>
-  count(): Promise<number>
   // Creates a hidden product, or returns null when `limit` products already exist.
   createWithinLimit(input: ProductInput, limit: number): Promise<{ id: number } | null>
   update(productId: number, input: ProductInput): Promise<boolean>

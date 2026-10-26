@@ -9,7 +9,7 @@ import { requireAdmin } from "@/lib/auth"
 import { formatPrice } from "@/lib/format"
 import { salesTypeMeta } from "@/lib/salesTypes"
 import { ProductRepository } from "@/repositories/implementations/productRepository"
-import { getProductsWithVariants } from "@/services/storeQueryService"
+import { listProductsForAdmin } from "@/services/admin/productAdminService"
 import PriceForm from "./PriceForm"
 import StockAdjustForm from "./StockAdjustForm"
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = { title: "在庫・価格" }
 
 export default async function Page() {
   await requireAdmin()
-  const products = await getProductsWithVariants(new ProductRepository())
+  const products = await listProductsForAdmin(new ProductRepository())
 
   return (
     <div className="space-y-8">
@@ -29,6 +29,7 @@ export default async function Page() {
           <h2 className="flex flex-wrap items-center gap-3 text-xl font-semibold">
             {product.name}
             <Badge variant="outline">{salesTypeMeta[product.salesType].label}</Badge>
+            {product.isPublished ? null : <Badge variant="outline">非公開</Badge>}
           </h2>
           <Card className="py-0">
             <Table>
@@ -42,8 +43,13 @@ export default async function Page() {
               </TableHeader>
               <TableBody>
                 {product.variants.map(variant => (
-                  <TableRow key={variant.id}>
-                    <TableCell className="p-4 font-medium">{variant.name}</TableCell>
+                  <TableRow key={variant.id} id={`variant-${variant.id}`} className="scroll-mt-20">
+                    <TableCell className="p-4 font-medium">
+                      <span className="inline-flex flex-wrap items-center gap-2">
+                        {variant.name}
+                        {variant.isPublished ? null : <Badge variant="outline">非公開</Badge>}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-right font-semibold">{formatPrice(variant.price)}</TableCell>
                     <TableCell className="text-right">
                       <span className="inline-flex items-center gap-2">

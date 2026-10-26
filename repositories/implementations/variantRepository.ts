@@ -37,10 +37,6 @@ export class VariantRepository implements IVariantRepository {
     return await prisma.variant.findFirst({ where: { id: variantId, productId } })
   }
 
-  async countByProductId(productId: number) {
-    return await prisma.variant.count({ where: { productId } })
-  }
-
   async createWithinLimit(productId: number, input: VariantInput, limit: number) {
     return await prisma.$transaction(async tx => {
       if (await tx.variant.count({ where: { productId } }) >= limit) return null

@@ -7,7 +7,6 @@ export interface IVariantRepository {
   findManyByProductId(productId: number): Promise<Variant[]>
   // The variant only when it belongs to productId.
   findByIdForAdmin(productId: number, variantId: number): Promise<VariantForAdmin | null>
-  countByProductId(productId: number): Promise<number>
   // Creates a hidden variant, or returns null when the product already has `limit` variants.
   createWithinLimit(productId: number, input: VariantInput, limit: number): Promise<{ id: number } | null>
   // The next two update only a variant of productId and return whether a row was updated.
