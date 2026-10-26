@@ -21,6 +21,11 @@ export type AdminOrderDetail = AdminOrderSummary & {
 export interface IOrderRepository {
   findManyByUserId(userId: number, limit?: number): Promise<Order[]>
   findByOrderIdForUser(orderId: number, userId: number): Promise<Order | null>
-  findManyForAdmin(filter: { shippingStatus: ShippingStatus | null }): Promise<AdminOrderSummary[]>
+  // Newest first. paymentStatus and limit are optional narrowing for the dashboard.
+  findManyForAdmin(filter: { shippingStatus: ShippingStatus | null, paymentStatus?: string, limit?: number }): Promise<AdminOrderSummary[]>
   findByIdForAdmin(orderId: number): Promise<AdminOrderDetail | null>
+  countByShippingStatus(): Promise<Partial<Record<string, number>>>
+  countByPaymentStatus(paymentStatus: string): Promise<number>
+  // Orders placed at or after `since`, excluding cancelled ones; totalPrice includes shipping.
+  summarizeSales(since: Date): Promise<{ orderCount: number, totalPrice: number }>
 }
