@@ -246,3 +246,35 @@ test("非公開のものは数量を増やせない", async () => {
   await assert.rejects(updateCartItemQuantity(0, cartItem.id, "increment"), { code: "QUANTITY_UNAVAILABLE" })
   assert.equal((await prisma.cartItem.findUniqueOrThrow({ where: { id: cartItem.id } })).quantity, 1)
 })
+
+async function cartWithSaleVariant() {
+  const cart = await prisma.cart.findUniqueOrThrow({ where: { userId: 0 } })
+  await prisma.cartItem.createMany({ data: [
+    { cartId: cart.id, variantId: 0, quantity: 2 },
+    { cartId: cart.id, variantId: saleVariantId, quantity: 1 },
+  ] })
+  return cart
+}
+
+async function assertNothingChanged(cartId: number) {
+  assert.equal((await prisma.variant.findUniqueOrThrow({ where: { id: 0 } })).stock, 50)
+  assert.equal((await prisma.variant.findUniqueOrThrow({ where: { id: saleVariantId } })).stock, 5)
+  assert.equal(await prisma.order.count({ where: { userId: 0 } }), 0)
+  assert.equal(await prisma.cartItem.count({ where: { cartId } }), 2)
+}
+
+test("非公開のバリエーションがカートにあると注文確定は UNAVAILABLE で、在庫・注文・カートは変わらない", async () => {
+  const cart = await cartWithSaleVariant()
+  await prisma.variant.update({ where: { id: saleVariantId }, data: { isPublished: false } })
+
+  await assert.rejects(createOrderFromCart(0), { code: "UNAVAILABLE", message: `販売を停止した商品がカートに含まれています: ${SALE_VARIANT_NAME}` })
+  await assertNothingChanged(cart.id)
+})
+
+test("非公開の商品がカートにあると注文確定は UNAVAILABLE", async () => {
+  const cart = await cartWithSaleVariant()
+  await prisma.product.update({ where: { id: saleProductId }, data: { isPublished: false } })
+
+  await assert.rejects(createOrderFromCart(0), (error: unknown) => error instanceof CheckoutError && error.code === "UNAVAILABLE")
+  await assertNothingChanged(cart.id)
+})

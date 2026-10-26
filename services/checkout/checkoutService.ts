@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { formatCardLabel } from "@/lib/cards";
+import { isOnSale } from "@/lib/availability";
 import type { PaymentGateway } from "@/services/payment/paymentGateway";
 import { calculateOrderTotal, SHIPPING_PRICE } from "./orderPricing";
 import { INITIAL_PAYMENT_STATUS, INITIAL_SHIPPING_STATUS, PAID_PAYMENT_STATUS, PAYMENT_ERROR_STATUS } from "./orderStatus";
@@ -8,6 +9,7 @@ import { INITIAL_PAYMENT_STATUS, INITIAL_SHIPPING_STATUS, PAID_PAYMENT_STATUS, P
 export type CheckoutErrorCode =
   | "EMPTY_CART"
   | "INSUFFICIENT_STOCK"
+  | "UNAVAILABLE"
   | "CART_CHANGED"
   | "PAYMENT_METHOD_NOT_FOUND"
   | "PAYMENT_DECLINED"
@@ -29,6 +31,9 @@ type OrderPayment = {
 }
 
 const emptyCartError = () => new CheckoutError("EMPTY_CART", "カートが空です")
+const unavailableError = (variantName: string) =>
+  new CheckoutError("UNAVAILABLE", `販売を停止した商品がカートに含まれています: ${variantName}`)
+const withProductPublished = { product: { select: { isPublished: true } } } as const
 
 export async function createOrderFromCart(userId: number, payment?: OrderPayment) {
   return prisma.$transaction(async tx => {
@@ -52,9 +57,12 @@ export async function createOrderFromCart(userId: number, payment?: OrderPayment
     }
 
     for (const item of cart.items) {
+      // Publication is part of the same conditional update, so a product hidden concurrently is never sold.
       const stockUpdate = await tx.variant.updateMany({
         where: {
           id: item.variantId,
+          isPublished: true,
+          product: { isPublished: true },
           stock: { gte: item.quantity }
         },
         data: {
@@ -63,6 +71,8 @@ export async function createOrderFromCart(userId: number, payment?: OrderPayment
       })
 
       if (stockUpdate.count !== 1) {
+        const current = await tx.variant.findUnique({ where: { id: item.variantId }, include: withProductPublished })
+        if (!current || !isOnSale(current)) throw unavailableError(item.variant.name)
         throw new CheckoutError(
           "INSUFFICIENT_STOCK",
           `在庫が不足しています: ${item.variant.name}`,
@@ -117,9 +127,12 @@ async function findOrderIdByPayment(userId: number, paymentIntentId: string) {
 async function calculateCartTotal(userId: number) {
   const cart = await prisma.cart.findUnique({
     where: { userId },
-    include: { items: { include: { variant: true } } },
+    include: { items: { include: { variant: { include: withProductPublished } } } },
   })
   if (!cart || cart.items.length === 0) throw emptyCartError()
+  // Checked before authorizing so a hidden product never puts a hold on the card.
+  const unavailable = cart.items.find(item => !isOnSale(item.variant))
+  if (unavailable) throw unavailableError(unavailable.variant.name)
   return calculateOrderTotal(cart.items, SHIPPING_PRICE)
 }
 
