@@ -114,7 +114,7 @@ test("商品情報・バリエーション名・画像の変更がストアに�
 
   const renamed = `${e2eProduct.name} 改`
   await page.getByLabel("商品名").fill(renamed)
-  await page.getByLabel("説明").fill("説明を変更しました")
+  await page.getByLabel("説明").fill("説明を変更しました\n2行目")
   await page.getByRole("radio", { name: "タペストリー（商品画像）" }).check()
   await page.getByRole("button", { name: "保存する" }).click()
   await expect(page.getByText("商品情報を保存しました")).toBeVisible()
@@ -131,7 +131,8 @@ test("商品情報・バリエーション名・画像の変更がストアに�
   await withShopper(browser, shopper, async shopperPage => {
     await shopperPage.goto(`/products/${productId}`)
     await expect(shopperPage.getByRole("heading", { name: renamed })).toBeVisible()
-    await expect(shopperPage.getByText("説明を変更しました")).toBeVisible()
+    // Line breaks typed into the description textarea are kept on the store page.
+    expect(await shopperPage.getByText("説明を変更しました").innerText()).toBe("説明を変更しました\n2行目")
     await expect(shopperPage.getByRole("button", { name: new RegExp(`${e2eProduct.name} レモン`) })).toBeVisible()
     await expect(shopperPage.locator('img[src*="product-3.webp"]').first()).toBeAttached()
     await expect(shopperPage.locator('img[src*="variant-6.webp"]').first()).toBeAttached()

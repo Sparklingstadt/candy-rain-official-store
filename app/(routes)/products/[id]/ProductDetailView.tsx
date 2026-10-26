@@ -45,7 +45,7 @@ export default function ProductDetailView({ product, images, variants, variantIm
               {formatPrice(selectedVariant.price)}
               {hasVariantChoice && <span className="ml-2 text-sm font-medium text-muted-foreground">{selectedVariant.name}</span>}
             </p>
-            <p className="leading-7 text-muted-foreground">{product.description || "日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。"}</p>
+            <p className="whitespace-pre-line leading-7 text-muted-foreground">{product.description || "日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。"}</p>
           </div>
           <ProductActions variants={variants} selectedVariant={selectedVariant} showVariantPicker={hasVariantChoice} onVariantChange={selectVariant} />
           {children}
