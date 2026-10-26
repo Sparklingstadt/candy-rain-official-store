@@ -157,3 +157,24 @@ test("入力エラーは項目ごとに表示され、入力値が残る", async
   await expect(page.getByLabel("説明")).toHaveValue("残しておく説明")
   await expect(page).toHaveURL(/\/admin\/products\/new$/)
 })
+
+test("商品一覧はカード表示が既定で、リスト表示と切り替えられる", async ({ page, admin }) => {
+  await admin.signIn(page)
+  await page.goto("/admin/products")
+  const toggle = page.getByRole("navigation", { name: "表示の切り替え" })
+  await expect(toggle.getByRole("link", { name: "カード" })).toHaveAttribute("aria-current", "page")
+  await expect(page.getByRole("table")).toHaveCount(0)
+  const card = page.getByRole("link", { name: /ランダム缶バッジ/ })
+  await expect(card).toContainText("公開中")
+  await expect(card).toContainText("事前販売")
+
+  await toggle.getByRole("link", { name: "リスト" }).click()
+  await expect(page).toHaveURL(/\/admin\/products\?view=list$/)
+  await expect(toggle.getByRole("link", { name: "リスト" })).toHaveAttribute("aria-current", "page")
+  await expect(page.getByRole("row", { name: /ランダム缶バッジ/ })).toContainText("公開中")
+
+  await toggle.getByRole("link", { name: "カード" }).click()
+  await expect(page).toHaveURL(/\/admin\/products$/)
+  await page.getByRole("link", { name: /ランダム缶バッジ/ }).click()
+  await expect(page).toHaveURL(/\/admin\/products\/0$/)
+})
