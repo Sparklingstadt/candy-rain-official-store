@@ -2,6 +2,9 @@
 // npm install --save-dev prisma dotenv
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
+import { withExplicitSslMode } from "./lib/databaseUrl";
+
+const databaseUrl = process.env["DATABASE_URL"];
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -10,6 +13,6 @@ export default defineConfig({
     seed: "npx tsx ./prisma/seed.ts"
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: databaseUrl && withExplicitSslMode(databaseUrl),
   },
 });
