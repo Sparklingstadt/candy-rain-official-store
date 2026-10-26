@@ -18,6 +18,14 @@ export type AdminOrderDetail = AdminOrderSummary & {
   shippingAddress: { postalCode: string, prefecture: string, addressLine1: string, addressLine2: string | null } | null
 }
 
+export type SalesSummary = {
+  orderCount: number
+  // All non-cancelled orders, including unpaid and payment/refund errors.
+  totalPrice: number
+  paidOrderCount: number
+  paidTotalPrice: number
+}
+
 export interface IOrderRepository {
   findManyByUserId(userId: number, limit?: number): Promise<Order[]>
   findByOrderIdForUser(orderId: number, userId: number): Promise<Order | null>
@@ -26,6 +34,7 @@ export interface IOrderRepository {
   findByIdForAdmin(orderId: number): Promise<AdminOrderDetail | null>
   countByShippingStatus(): Promise<Partial<Record<string, number>>>
   countByPaymentStatus(paymentStatus: string): Promise<number>
-  // Orders placed at or after `since`, excluding cancelled ones; totalPrice includes shipping.
-  summarizeSales(since: Date): Promise<{ orderCount: number, totalPrice: number }>
+  // Order-date cohort at or after `since`, excluding cancelled orders; amounts include shipping.
+  // Paid figures include only PAID_PAYMENT_STATUS, not refund errors or refunded orders.
+  summarizeSales(since: Date): Promise<SalesSummary>
 }

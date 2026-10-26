@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma"
-import { IOrderRepository, type AdminOrderDetail, type AdminOrderSummary } from "../interfaces/IOrderRepository"
+import { IOrderRepository, type AdminOrderDetail, type AdminOrderSummary, type SalesSummary } from "../interfaces/IOrderRepository"
 import type { ShippingStatus } from "@/services/admin/shippingStatusTransition"
 import { Order } from "../entities/Order"
-import { CANCELLED_SHIPPING_STATUS } from "@/services/checkout/orderStatus"
+import { CANCELLED_SHIPPING_STATUS, PAID_PAYMENT_STATUS } from "@/services/checkout/orderStatus"
 
 export class OrderRepository implements IOrderRepository {
   async findManyByUserId(userId: number, limit?: number) {
@@ -95,12 +95,23 @@ export class OrderRepository implements IOrderRepository {
     return await prisma.order.count({ where: { paymentStatus } })
   }
 
-  async summarizeSales(since: Date) {
-    const result = await prisma.order.aggregate({
+  async summarizeSales(since: Date): Promise<SalesSummary> {
+    // One query keeps order totals and paid totals on the same database snapshot.
+    const groups = await prisma.order.groupBy({
+      by: ["paymentStatus"],
       where: { orderedAt: { gte: since }, shippingStatus: { not: CANCELLED_SHIPPING_STATUS } },
       _count: { _all: true },
       _sum: { totalPrice: true },
     })
-    return { orderCount: result._count._all, totalPrice: result._sum.totalPrice ?? 0 }
+    return groups.reduce<SalesSummary>((summary, group) => {
+      const totalPrice = group._sum.totalPrice ?? 0
+      summary.orderCount += group._count._all
+      summary.totalPrice += totalPrice
+      if (group.paymentStatus === PAID_PAYMENT_STATUS) {
+        summary.paidOrderCount += group._count._all
+        summary.paidTotalPrice += totalPrice
+      }
+      return summary
+    }, { orderCount: 0, totalPrice: 0, paidOrderCount: 0, paidTotalPrice: 0 })
   }
 }

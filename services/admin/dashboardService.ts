@@ -1,7 +1,7 @@
 import "server-only"
 import { countStoreStatuses, type StoreStatus } from "@/lib/productStatus"
 import { tokyoPeriodStarts } from "@/lib/tokyoTime"
-import type { AdminOrderSummary, IOrderRepository } from "@/repositories/interfaces/IOrderRepository"
+import type { AdminOrderSummary, IOrderRepository, SalesSummary } from "@/repositories/interfaces/IOrderRepository"
 import type { IProductRepository } from "@/repositories/interfaces/IProductRepository"
 import type { IVariantRepository } from "@/repositories/interfaces/IVariantRepository"
 import { INITIAL_SHIPPING_STATUS, PREPARING_SHIPPING_STATUS, REFUND_ERROR_PAYMENT_STATUS } from "@/services/checkout/orderStatus"
@@ -9,7 +9,7 @@ import { listProductsForAdmin, MAX_PRODUCTS } from "./productAdminService"
 
 const LIST_LIMIT = 5
 
-export type SalesSummary = { orderCount: number, totalPrice: number }
+export type { SalesSummary } from "@/repositories/interfaces/IOrderRepository"
 
 export type DashboardSummary = {
   pending: { unshipped: number, preparing: number, refundErrors: number, soldOut: number }
