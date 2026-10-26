@@ -54,4 +54,8 @@ export class VariantRepository implements IVariantRepository {
     const updated = await prisma.variant.updateMany({ where: { id: variantId, productId }, data: { isPublished: published } })
     return updated.count === 1
   }
+
+  async countSoldOutOnSale() {
+    return await prisma.variant.count({ where: { stock: { lte: 0 }, isPublished: true, product: { isPublished: true } } })
+  }
 }

@@ -12,6 +12,8 @@ export interface IVariantRepository {
   // The next two update only a variant of productId and return whether a row was updated.
   update(productId: number, variantId: number, input: VariantUpdateInput): Promise<boolean>
   setPublished(productId: number, variantId: number, published: boolean): Promise<boolean>
+  // Variants a customer can see as sold out: stock 0 while the variant and its product are published.
+  countSoldOutOnSale(): Promise<number>
   // Returns the stock after the change, or null when the variant is missing or a decrease would take the stock below zero.
   adjustStock(variantId: number, delta: number): Promise<number | null>
   // Updates only while the price still equals currentPrice; returns whether a row was updated.

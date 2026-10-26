@@ -21,14 +21,14 @@ async function stockOfVariant(database: pg.Pool, variantId: number): Promise<num
   return result.rows[0].stock
 }
 
-test("管理者はサインイン後に注文管理へ移動し、ストアのページは開けない", async ({ page, admin }) => {
+test("管理者はサインイン後にダッシュボードへ移動し、ストアのページは開けない", async ({ page, admin }) => {
   await admin.signIn(page)
-  await expect(page).toHaveURL(/\/admin\/orders$/)
-  await expect(page.getByRole("heading", { name: "注文管理", exact: true })).toBeVisible()
+  await expect(page).toHaveURL(/\/admin\/dashboard$/)
+  await expect(page.getByRole("heading", { name: "ダッシュボード", exact: true })).toBeVisible()
   await page.goto("/products")
-  await expect(page).toHaveURL(/\/admin\/orders$/)
+  await expect(page).toHaveURL(/\/admin\/dashboard$/)
   await page.goto("/signin")
-  await expect(page).toHaveURL(/\/admin\/orders$/)
+  await expect(page).toHaveURL(/\/admin\/dashboard$/)
 })
 
 test("顧客は管理画面を開けない", async ({ page, shopper }) => {
@@ -266,7 +266,7 @@ test("別の管理者が先に価格を変えていたら、編集中の価格�
 test("390px 幅で管理ヘッダーが横にはみ出さない", async ({ page, admin }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await admin.signIn(page)
-  for (const path of ["/admin/orders", "/admin/products", "/admin/inventory"]) {
+  for (const path of ["/admin/dashboard", "/admin/orders", "/admin/products", "/admin/inventory"]) {
     await page.goto(path)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
     await expect(page.getByRole("button", { name: "サインアウト" })).toBeInViewport()

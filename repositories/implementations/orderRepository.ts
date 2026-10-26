@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { IOrderRepository, type AdminOrderDetail, type AdminOrderSummary } from "../interfaces/IOrderRepository"
 import type { ShippingStatus } from "@/services/admin/shippingStatusTransition"
 import { Order } from "../entities/Order"
+import { CANCELLED_SHIPPING_STATUS } from "@/services/checkout/orderStatus"
 
 export class OrderRepository implements IOrderRepository {
   async findManyByUserId(userId: number, limit?: number) {
@@ -39,10 +40,14 @@ export class OrderRepository implements IOrderRepository {
       order.paymentMethodLabel
     )
   }
-  async findManyForAdmin(filter: { shippingStatus: ShippingStatus | null }): Promise<AdminOrderSummary[]> {
+  async findManyForAdmin(filter: { shippingStatus: ShippingStatus | null, paymentStatus?: string, limit?: number }): Promise<AdminOrderSummary[]> {
     const orders = await prisma.order.findMany({
-      where: filter.shippingStatus ? { shippingStatus: filter.shippingStatus } : undefined,
+      where: {
+        ...(filter.shippingStatus ? { shippingStatus: filter.shippingStatus } : {}),
+        ...(filter.paymentStatus ? { paymentStatus: filter.paymentStatus } : {}),
+      },
       orderBy: [{ orderedAt: "desc" }, { id: "desc" }],
+      take: filter.limit,
       include: { user: { select: { firstName: true, lastName: true } } },
     })
     return orders.map(order => ({
@@ -79,5 +84,23 @@ export class OrderRepository implements IOrderRepository {
         ? { postalCode: user.postalCode, prefecture: user.prefecture, addressLine1: user.addressLine1, addressLine2: user.addressLine2 }
         : null,
     }
+  }
+
+  async countByShippingStatus() {
+    const groups = await prisma.order.groupBy({ by: ["shippingStatus"], _count: { _all: true } })
+    return Object.fromEntries(groups.map(group => [group.shippingStatus, group._count._all]))
+  }
+
+  async countByPaymentStatus(paymentStatus: string) {
+    return await prisma.order.count({ where: { paymentStatus } })
+  }
+
+  async summarizeSales(since: Date) {
+    const result = await prisma.order.aggregate({
+      where: { orderedAt: { gte: since }, shippingStatus: { not: CANCELLED_SHIPPING_STATUS } },
+      _count: { _all: true },
+      _sum: { totalPrice: true },
+    })
+    return { orderCount: result._count._all, totalPrice: result._sum.totalPrice ?? 0 }
   }
 }
