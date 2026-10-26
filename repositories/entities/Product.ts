@@ -25,3 +25,7 @@ export class Product {
 export type ProductWithVariant = Product & {
   variants: Variant[]
 }
+
+// Admin reads include hidden products and variants, so they carry the publication state.
+export type VariantForAdmin = Variant & { isPublished: boolean }
+export type ProductForAdmin = Product & { isPublished: boolean, variants: VariantForAdmin[] }
