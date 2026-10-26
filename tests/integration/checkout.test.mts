@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { after, beforeEach, test } from "node:test"
+import { after, before, beforeEach, test } from "node:test"
 import { prisma } from "../../lib/prisma"
 import { CheckoutError, createOrderFromCart } from "../../services/checkout/checkoutService"
 import { addItemToCart, CartError, removeItemFromCart, updateCartItemQuantity } from "../../services/cartService"
@@ -15,9 +15,36 @@ async function resetPurchaseData() {
   ])
 }
 
-beforeEach(resetPurchaseData)
+// A dedicated product lets these tests hide it without affecting the seeded catalog other files use in parallel.
+let saleProductId = 0
+let saleVariantId = 0
+const SALE_VARIANT_NAME = "公開切り替え用"
+
+before(async () => {
+  const product = await prisma.product.create({
+    data: {
+      name: `checkout-sale-${Date.now()}`,
+      description: "",
+      thumbnailImageUrl: "/products/candy/product-0.webp",
+      variants: { create: { name: SALE_VARIANT_NAME, price: 700, stock: 5, imageUrl: "/products/candy/variant-0.webp" } },
+    },
+    include: { variants: true },
+  })
+  saleProductId = product.id
+  saleVariantId = product.variants[0].id
+})
+
+beforeEach(async () => {
+  await resetPurchaseData()
+  await prisma.$transaction([
+    prisma.product.update({ where: { id: saleProductId }, data: { isPublished: true } }),
+    prisma.variant.update({ where: { id: saleVariantId }, data: { isPublished: true, stock: 5 } }),
+  ])
+})
 after(async () => {
   await resetPurchaseData()
+  await prisma.variant.deleteMany({ where: { productId: saleProductId } })
+  await prisma.product.delete({ where: { id: saleProductId } })
   await prisma.$disconnect()
 })
 
@@ -195,4 +222,59 @@ test("注文履歴は新しい注文から並ぶ", async () => {
 
   const orders = await new OrderRepository().findManyByUserId(0)
   assert.deepEqual(orders.map(order => order.id), [newer.id, older.id])
+})
+
+test("非公開のものはカートに追加できない", async () => {
+  await prisma.variant.update({ where: { id: saleVariantId }, data: { isPublished: false } })
+  await assert.rejects(addItemToCart({ userId: 0, variantId: saleVariantId, quantity: 1 }), { code: "UNAVAILABLE", message: "この商品は現在販売していません" })
+
+  await prisma.$transaction([
+    prisma.variant.update({ where: { id: saleVariantId }, data: { isPublished: true } }),
+    prisma.product.update({ where: { id: saleProductId }, data: { isPublished: false } }),
+  ])
+  await assert.rejects(addItemToCart({ userId: 0, variantId: saleVariantId, quantity: 1 }), { code: "UNAVAILABLE" })
+  const cart = await prisma.cart.findUniqueOrThrow({ where: { userId: 0 } })
+  assert.equal(await prisma.cartItem.count({ where: { cartId: cart.id } }), 0)
+})
+
+test("非公開のものは数量を増やせない", async () => {
+  await addItemToCart({ userId: 0, variantId: saleVariantId, quantity: 1 })
+  const cart = await prisma.cart.findUniqueOrThrow({ where: { userId: 0 } })
+  const cartItem = await prisma.cartItem.findFirstOrThrow({ where: { cartId: cart.id, variantId: saleVariantId } })
+  await prisma.product.update({ where: { id: saleProductId }, data: { isPublished: false } })
+
+  await assert.rejects(updateCartItemQuantity(0, cartItem.id, "increment"), { code: "QUANTITY_UNAVAILABLE" })
+  assert.equal((await prisma.cartItem.findUniqueOrThrow({ where: { id: cartItem.id } })).quantity, 1)
+})
+
+async function cartWithSaleVariant() {
+  const cart = await prisma.cart.findUniqueOrThrow({ where: { userId: 0 } })
+  await prisma.cartItem.createMany({ data: [
+    { cartId: cart.id, variantId: 0, quantity: 2 },
+    { cartId: cart.id, variantId: saleVariantId, quantity: 1 },
+  ] })
+  return cart
+}
+
+async function assertNothingChanged(cartId: number) {
+  assert.equal((await prisma.variant.findUniqueOrThrow({ where: { id: 0 } })).stock, 50)
+  assert.equal((await prisma.variant.findUniqueOrThrow({ where: { id: saleVariantId } })).stock, 5)
+  assert.equal(await prisma.order.count({ where: { userId: 0 } }), 0)
+  assert.equal(await prisma.cartItem.count({ where: { cartId } }), 2)
+}
+
+test("非公開のバリエーションがカートにあると注文確定は UNAVAILABLE で、在庫・注文・カートは変わらない", async () => {
+  const cart = await cartWithSaleVariant()
+  await prisma.variant.update({ where: { id: saleVariantId }, data: { isPublished: false } })
+
+  await assert.rejects(createOrderFromCart(0), { code: "UNAVAILABLE", message: `販売を停止した商品がカートに含まれています: ${SALE_VARIANT_NAME}` })
+  await assertNothingChanged(cart.id)
+})
+
+test("非公開の商品がカートにあると注文確定は UNAVAILABLE", async () => {
+  const cart = await cartWithSaleVariant()
+  await prisma.product.update({ where: { id: saleProductId }, data: { isPublished: false } })
+
+  await assert.rejects(createOrderFromCart(0), (error: unknown) => error instanceof CheckoutError && error.code === "UNAVAILABLE")
+  await assertNothingChanged(cart.id)
 })

@@ -38,6 +38,8 @@ model Product {
   description String
   variants Variant[]
   thumbnailImageUrl String
+  // Hidden products stay in order history but are not listed or sold.
+  isPublished Boolean @default(true)
 }
 
 enum Role {
@@ -60,6 +62,7 @@ model Variant {
   price Int
   stock Int
   imageUrl String
+  isPublished Boolean @default(true)
   cartItems CartItem[]
   orderItems OrderItem[]
 }

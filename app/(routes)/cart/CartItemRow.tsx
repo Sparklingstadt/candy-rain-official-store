@@ -3,10 +3,12 @@ import { useActionState } from "react"
 import { CartItemWithVariant } from "@/lib/types"
 import QuantityStepper from "@/app/components/QuantityStepper"
 import { maxCartQuantityFor } from "@/lib/validation"
+import { isOnSale } from "@/lib/availability"
 
 export function CartItemRow({ cartItem }: { cartItem: CartItemWithVariant }) {
   const [state, formAction, isPending] = useActionState(updateCartItemQuantityAction, null)
   const reachedStockLimit = cartItem.quantity >= cartItem.variant.stock
+  const onSale = isOnSale(cartItem.variant)
   const reachedLimit = cartItem.quantity >= maxCartQuantityFor(cartItem.variant.stock)
 
   return (
@@ -16,10 +18,10 @@ export function CartItemRow({ cartItem }: { cartItem: CartItemWithVariant }) {
         <QuantityStepper
           value={cartItem.quantity}
           decrementProps={{ type: "submit", name: "type", value: "decrement", disabled: isPending || cartItem.quantity <= 1 }}
-          incrementProps={{ type: "submit", name: "type", value: "increment", disabled: isPending || reachedLimit }}
+          incrementProps={{ type: "submit", name: "type", value: "increment", disabled: isPending || reachedLimit || !onSale }}
         />
       </form>
-      {reachedStockLimit ? (
+      {onSale && reachedStockLimit ? (
         <p className="text-xs text-muted-foreground">
           {cartItem.variant.stock <= 0 ? "在庫切れ" : "在庫上限"}
         </p>

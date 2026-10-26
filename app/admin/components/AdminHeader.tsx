@@ -9,6 +9,7 @@ import StoreLogo from "@/app/components/StoreLogo"
 
 const navigation = [
   { href: "/admin/orders", label: "注文" },
+  { href: "/admin/products", label: "商品" },
   { href: "/admin/inventory", label: "在庫・価格" },
 ]
 

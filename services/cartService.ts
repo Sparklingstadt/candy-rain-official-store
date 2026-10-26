@@ -2,7 +2,7 @@ import { CartRepository } from "@/repositories/implementations/cartRepository"
 import { CartItemRepository } from "@/repositories/implementations/cartItemRepository"
 import { MAX_CART_QUANTITY } from "@/lib/validation"
 
-export type CartErrorCode = "OUT_OF_STOCK" | "QUANTITY_UNAVAILABLE"
+export type CartErrorCode = "OUT_OF_STOCK" | "QUANTITY_UNAVAILABLE" | "UNAVAILABLE"
 
 export class CartError extends Error {
   constructor(
@@ -26,6 +26,7 @@ export async function addItemToCart({
 
   const result = await new CartItemRepository().addToCart({ cartId: cart.id, variantId, quantity })
   if ("error" in result) {
+    if (result.error === "UNAVAILABLE") throw new CartError("UNAVAILABLE", "この商品は現在販売していません")
     throw result.error === "OUT_OF_STOCK"
       ? new CartError("OUT_OF_STOCK", "選択した商品は売り切れです")
       : new CartError(

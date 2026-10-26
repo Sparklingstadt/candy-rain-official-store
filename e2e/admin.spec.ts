@@ -266,7 +266,7 @@ test("別の管理者が先に価格を変えていたら、編集中の価格�
 test("390px 幅で管理ヘッダーが横にはみ出さない", async ({ page, admin }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await admin.signIn(page)
-  for (const path of ["/admin/orders", "/admin/inventory"]) {
+  for (const path of ["/admin/orders", "/admin/products", "/admin/inventory"]) {
     await page.goto(path)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
     await expect(page.getByRole("button", { name: "サインアウト" })).toBeInViewport()

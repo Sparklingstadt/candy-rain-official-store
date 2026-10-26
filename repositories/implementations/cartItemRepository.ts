@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { AddToCartResult, ICartItemRepository } from "../interfaces/ICartItemRepository"
 import { maxCartQuantityFor } from "@/lib/validation"
+import { isOnSale } from "@/lib/availability"
+
+const withProductPublished = { product: { select: { isPublished: true } } }
 
 export class CartItemRepository implements ICartItemRepository {
   async findManyByCartId(cartId: number) {
@@ -12,7 +15,7 @@ export class CartItemRepository implements ICartItemRepository {
     return await prisma.cartItem.findMany({
       where: { cartId },
       include: {
-        variant: true
+        variant: { include: withProductPublished }
       },
       // Keep rows in place while quantities change; updates would otherwise reorder them.
       orderBy: { id: "asc" },
@@ -29,8 +32,10 @@ export class CartItemRepository implements ICartItemRepository {
   }) {
     // Adding an item already in the cart increases its quantity instead of resetting it.
     return prisma.$transaction(async (tx): Promise<AddToCartResult> => {
-      const variant = await tx.variant.findUnique({ where: { id: variantId } })
-      if (!variant || variant.stock <= 0) return { error: "OUT_OF_STOCK" }
+      const variant = await tx.variant.findUnique({ where: { id: variantId }, include: withProductPublished })
+      if (!variant) return { error: "OUT_OF_STOCK" }
+      if (!isOnSale(variant)) return { error: "UNAVAILABLE" }
+      if (variant.stock <= 0) return { error: "OUT_OF_STOCK" }
 
       const cartItem = await tx.cartItem.findUnique({ where: { cartId_variantId: { cartId, variantId } } })
       const nextQuantity = (cartItem?.quantity ?? 0) + quantity
@@ -59,11 +64,12 @@ export class CartItemRepository implements ICartItemRepository {
           id: cartItemId,
           cart: { userId },
         },
-        include: { variant: true },
+        include: { variant: { include: withProductPublished } },
       })
 
       if (
         !cartItem ||
+        !isOnSale(cartItem.variant) ||
         cartItem.quantity >= maxCartQuantityFor(cartItem.variant.stock)
       ) {
         return 0

@@ -31,7 +31,7 @@ beforeEach(async () => {
     prisma.orderItem.deleteMany({ where: { order: { userId } } }),
     prisma.order.deleteMany({ where: { userId } }),
     prisma.cartItem.deleteMany({ where: { cartId } }),
-    prisma.variant.update({ where: { id: VARIANT_ID }, data: { stock: 50 } }),
+    prisma.variant.update({ where: { id: VARIANT_ID }, data: { stock: 50, isPublished: true } }),
   ])
   await prisma.cartItem.create({ data: { cartId, variantId: VARIANT_ID, quantity: 2 } })
 })
@@ -43,7 +43,7 @@ after(async () => {
     prisma.cartItem.deleteMany({ where: { cartId } }),
     prisma.cart.delete({ where: { id: cartId } }),
     prisma.user.delete({ where: { id: userId } }),
-    prisma.variant.update({ where: { id: VARIANT_ID }, data: { stock: 50 } }),
+    prisma.variant.update({ where: { id: VARIANT_ID }, data: { stock: 50, isPublished: true } }),
   ])
   await prisma.$disconnect()
 })
@@ -142,4 +142,26 @@ test("売上の確定に失敗した注文は決済エラーとして残す", as
   assert.ok(result.status === "completed")
   const order = await prisma.order.findUniqueOrThrow({ where: { id: result.orderId } })
   assert.equal(order.paymentStatus, PAYMENT_ERROR_STATUS)
+})
+
+test("非公開品があるとカード決済は与信の前に UNAVAILABLE になる", async () => {
+  await prisma.variant.update({ where: { id: VARIANT_ID }, data: { isPublished: false } })
+
+  await assert.rejects(() => startPaidCheckout(gateway, userId, CARD.id), (error: unknown) =>
+    error instanceof CheckoutError && error.code === "UNAVAILABLE")
+  assert.deepEqual(gateway.calls, [])
+  assert.equal(await orderCount(), 0)
+})
+
+test("3D セキュア認証中に非公開になったら注文を作らず与信を取り消す", async () => {
+  gateway.authorizeStatus = "requires_action"
+  await startPaidCheckout(gateway, userId, CARD.id)
+  await prisma.variant.update({ where: { id: VARIANT_ID }, data: { isPublished: false } })
+  gateway.payments.get("pi_1")!.status = "authorized"
+
+  await assert.rejects(() => completePaidCheckout(gateway, userId, "pi_1"), (error: unknown) =>
+    error instanceof CheckoutError && error.code === "UNAVAILABLE")
+  assert.deepEqual(gateway.calls, ["authorize", "cancel:pi_1"])
+  assert.equal(await orderCount(), 0)
+  assert.equal(await stock(), 50)
 })

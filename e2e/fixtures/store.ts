@@ -5,8 +5,9 @@ import pg from "pg"
 
 type Shopper = { id: number; email: string; signIn: (page: Page) => Promise<void> }
 type Admin = { email: string; signIn: (page: Page) => Promise<void> }
+type E2eProduct = { name: string }
 
-export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.Pool; seedVariant1: void }>({
+export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.Pool; seedVariant1: void; e2eProduct: E2eProduct }>({
   database: async ({}, provide) => {
     const database = new pg.Pool({ connectionString: process.env.DATABASE_URL })
     try { await provide(database) } finally { await database.end() }
@@ -16,6 +17,18 @@ export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.P
   seedVariant1: async ({ database }, provide) => {
     try { await provide() } finally {
       await database.query('UPDATE "Variant" SET stock = 50, price = 800 WHERE id = 1')
+    }
+  },
+  // A unique product name for tests that register products; teardown deletes every product whose name starts with it
+  // (renamed ones included) together with its variants and the cart and order rows that point at them.
+  e2eProduct: async ({ database }, provide) => {
+    const name = `E2E-${randomUUID().slice(0, 8)}`
+    try { await provide({ name }) } finally {
+      const variants = 'SELECT v.id FROM "Variant" v JOIN "Product" p ON p.id = v."productId" WHERE p.name LIKE $1'
+      await database.query(`DELETE FROM "CartItem" WHERE "variantId" IN (${variants})`, [`${name}%`])
+      await database.query(`DELETE FROM "OrderItem" WHERE "variantId" IN (${variants})`, [`${name}%`])
+      await database.query(`DELETE FROM "Variant" WHERE id IN (${variants})`, [`${name}%`])
+      await database.query('DELETE FROM "Product" WHERE name LIKE $1', [`${name}%`])
     }
   },
   // The seeded admin account is shared and read-only here, so there is nothing to create or clean up.
