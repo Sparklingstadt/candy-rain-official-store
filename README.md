@@ -137,6 +137,20 @@ main への push では、2つの検証ジョブと `CI passed` の成功後に 
 
 本番は [Vercel](https://candy-rain-official-store.vercel.app) で公開しています。通常のビルドは DB を更新しません。DB の migration は対象の `DATABASE_URL` を確認して `npm run db:migrate` を実行するか、[Migrate production database](.github/workflows/migrate-production.yml) を手動実行します。後者では GitHub の `production` Environment に `DATABASE_URL` secret を設定します。
 
+`User` のメールアドレスは大文字・小文字を区別せず一意です（`User_email_lower_key`、Candy Rain ID もこの名前で重複を判定します）。本番に適用する前に、次の SQL が 0 行であることを確認します。重複があると migration は件数を示して失敗します。
+
+```sql
+SELECT lower(email), count(*) FROM "User" GROUP BY 1 HAVING count(*) > 1;
+```
+
+重複で migration が失敗した場合は、次の SQL で該当の行を確認して修正します。その後 `npx prisma migrate resolve --rolled-back 20261028000000_user_email_lower_unique` を実行し、migration をもう一度適用します。
+
+```sql
+SELECT id, email FROM "User" WHERE lower(email) IN (SELECT lower(email) FROM "User" GROUP BY 1 HAVING count(*) > 1) ORDER BY lower(email), id;
+```
+
+インデックスは通常の `CREATE UNIQUE INDEX` で作成するため、作成中は `User` への書き込みが短時間ブロックされます。現在のテーブル規模では問題ありませんが、行数が多い場合は利用の少ない時間帯に適用してください。
+
 管理画面で登録できる商品は 30 件までで、物理削除の画面はありません。公開デモで上限に達した場合は、注文に使われていない登録商品（ID 5 以上）を次のコマンドで削除できます。既定は対象の一覧を表示するだけで、`--apply` を付けたときだけ削除します。注文履歴のある商品とシードの商品（ID 0〜4）は削除しません。
 
 ```bash
