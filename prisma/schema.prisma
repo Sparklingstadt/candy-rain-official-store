@@ -12,6 +12,7 @@ datasource db {
   provider = "postgresql"
 }
 
+// User_email_lower_key（lower(email) の一意インデックス）は migration 20261028000000_user_email_lower_unique の生 SQL で管理しており、Prisma ではモデル化しない。
 model User {
   id Int @id @default(autoincrement())
   email String @unique
