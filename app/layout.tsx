@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: { template: "%s | Candy Rain Store", default: "Candy Rain Store" },
+  title: { template: "%s | Candy Rain Official Store", default: "Candy Rain Official Store" },
   description: "EC Shopping app developed with Next.js v16",
 };
 

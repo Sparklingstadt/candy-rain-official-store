@@ -1,4 +1,4 @@
-# Candy Club — Candy Rain Storeの商品素材
+# Candy Club — Candy Rain Official Storeの商品素材
 
 Blender 5.2.2 / Cyclesで作成した、キャンディーモチーフの3D商品モックアップです。
 `prd-ec-shop/prisma/seed.ts`の全5商品・10バリエーションに対応しています。

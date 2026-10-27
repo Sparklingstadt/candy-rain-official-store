@@ -68,7 +68,7 @@ export default function StoreHeader({ cartItemCount, signedIn }: { cartItemCount
             カート
             <CartCount count={cartItemCount} />
           </Link>
-          <a href="https://github.com/Sparklingstadt/prd-candy-rain-store" target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "text-muted-foreground")}>
+          <a href="https://github.com/Sparklingstadt/candy-rain-official-store" target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "text-muted-foreground")}>
             <Code2 />
             <span className="sr-only">GitHub</span>
           </a>
@@ -90,7 +90,7 @@ export default function StoreHeader({ cartItemCount, signedIn }: { cartItemCount
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Candy Rain Store</SheetTitle>
+                <SheetTitle>Candy Rain Official Store</SheetTitle>
                 <SheetDescription>{signedIn ? "サインイン中" : "ゲスト"} ・ ストアメニュー</SheetDescription>
               </SheetHeader>
               <nav className="flex flex-col gap-2 px-4" aria-label="モバイルナビゲーション">

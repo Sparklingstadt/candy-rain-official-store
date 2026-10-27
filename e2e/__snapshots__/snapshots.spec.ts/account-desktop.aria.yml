@@ -1,7 +1,7 @@
 - main:
   - text: TS Member
   - heading "Test Shopper" [level=1]
-  - paragraph: Candy Rain Store のアカウント
+  - paragraph: Candy Rain Official Store のアカウント
   - button "サインアウト"
   - heading "注文履歴" [level=2]
   - paragraph: 最近の注文と配送状況
