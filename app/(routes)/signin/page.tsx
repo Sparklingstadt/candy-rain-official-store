@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { SignInForm } from "@/app/(routes)/signin/SignInForm"
+import { CandyRainIdSignIn } from "@/app/(routes)/signin/CandyRainIdSignIn"
+import { candyRainIdIssuer, candyRainIdProviderId } from "@/auth"
 import CandyPill from "@/app/components/CandyPill"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -20,6 +22,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
           <p role="alert" className="border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
             メールアドレスまたはパスワードが正しくありません。
           </p>
+        )}
+        {candyRainIdIssuer && (
+          <>
+            <CandyRainIdSignIn providerId={candyRainIdProviderId} />
+            <div className="flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />または<span className="h-px flex-1 bg-border" /></div>
+          </>
         )}
         <SignInForm />
         <div className="bg-muted p-4 text-sm">
