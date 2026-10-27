@@ -26,7 +26,7 @@ for (const viewport of [
     }
     test("signin", async ({ page }) => {
       await page.goto("/signin")
-      await expect(page.getByRole("button", { name: "サインイン", exact: true })).toBeVisible()
+      await expect(page.getByRole("button", { name: "Candy Rain ID でサインイン", exact: true })).toBeVisible()
       await expect(page.getByRole("main")).toMatchAriaSnapshot({ name: `signin-${viewport.name}.aria.yml` })
     })
     test("order-detail", async ({ page, shopper, database }) => {

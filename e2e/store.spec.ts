@@ -1,6 +1,7 @@
 import "dotenv/config"
 import { expect, test, type Page } from "@playwright/test"
 import pg from "pg"
+import { signInWithCandyRainId } from "./fixtures/store"
 
 const database = new pg.Pool({ connectionString: process.env.DATABASE_URL })
 
@@ -9,10 +10,7 @@ test.afterAll(async () => {
 })
 
 async function signIn(page: Page) {
-  await page.goto("/signin")
-  await page.getByLabel("メールアドレス").fill("user1@mail.com")
-  await page.getByLabel("パスワード").fill("demo-password")
-  await page.getByRole("button", { name: "サインイン" }).click()
+  await signInWithCandyRainId(page, "user1@mail.com")
   await expect(page).toHaveURL(/\/products$/)
 }
 
@@ -20,14 +18,14 @@ test("未認証ユーザーをサインイン画面へ誘導する", async ({ pa
   await page.goto("/products")
 
   await expect(page).toHaveURL(/\/signin$/)
-  await expect(page.getByRole("button", { name: "サインイン" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Candy Rain ID でサインイン" })).toBeVisible()
 })
 
 test("未認証ユーザーを商品詳細からもサインイン画面へ誘導する", async ({ page }) => {
   await page.goto("/products/0")
 
   await expect(page).toHaveURL(/\/signin$/)
-  await expect(page.getByRole("button", { name: "サインイン" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Candy Rain ID でサインイン" })).toBeVisible()
 })
 
 test("未認証でも公開商品画像を配信する", async ({ request }) => {
@@ -44,13 +42,12 @@ test("未認証でも公開商品画像を配信する", async ({ request }) => 
 })
 
 test("パスワードが正しくない場合はサインインできない", async ({ page }) => {
-  await page.goto("/signin")
-  await page.getByLabel("メールアドレス").fill("user1@mail.com")
-  await page.getByLabel("パスワード").fill("wrong-password")
-  await page.getByRole("button", { name: "サインイン" }).click()
+  await signInWithCandyRainId(page, "user1@mail.com", "wrong-password")
 
-  await expect(page).toHaveURL(/\/signin\?error=credentials$/)
-  await expect(page.getByText("メールアドレスまたはパスワードが正しくありません。", { exact: true })).toBeVisible()
+  // The identity server keeps the form open with an error instead of returning to the store.
+  await expect(page.getByRole("alert")).toHaveText("メールアドレスまたはパスワードが違います。")
+  await expect(page.getByLabel("メールアドレス", { exact: true })).toHaveValue("user1@mail.com")
+  expect(Boolean((await (await page.request.get("/api/auth/session")).json())?.user)).toBe(false)
 })
 
 test("サインインして商品を購入できる", async ({ page }) => {

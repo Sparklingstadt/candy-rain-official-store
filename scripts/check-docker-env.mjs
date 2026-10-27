@@ -34,4 +34,8 @@ if (!process.env.AUTH_SECRET || process.env.AUTH_SECRET === "replace-with-a-rand
   throw new Error("AUTH_SECRET is missing or still uses the example value.")
 }
 
+if (!process.env.AUTH_CANDY_RAIN_ID_ISSUER || !process.env.AUTH_CANDY_RAIN_ID_ID || !process.env.AUTH_CANDY_RAIN_ID_SECRET) {
+  throw new Error("AUTH_CANDY_RAIN_ID_* is missing. Copy those lines from .env.example to .env.")
+}
+
 console.log("Environment is configured for the project Docker database.")

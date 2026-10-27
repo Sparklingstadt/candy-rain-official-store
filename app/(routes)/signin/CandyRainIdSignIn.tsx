@@ -1,5 +1,5 @@
 import { signIn } from "@/auth"
-import { Button } from "@/components/ui/button"
+import SignInButton from "./SignInButton"
 
 export function CandyRainIdSignIn({ providerId }: { providerId: string }) {
   const handleSignIn = async () => {
@@ -9,7 +9,7 @@ export function CandyRainIdSignIn({ providerId }: { providerId: string }) {
 
   return (
     <form action={handleSignIn}>
-      <Button type="submit" variant="outline" className="w-full">Candy Rain ID でサインイン</Button>
+      <SignInButton />
     </form>
   )
 }
