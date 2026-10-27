@@ -11,6 +11,40 @@ const products = [
   { id: 4, name: "オリジナル TEE", category: "グッズ", salesType: "PERMANENT", description: "", thumbnailImageUrl: "/products/candy/product-4.webp" },
 ] satisfies Prisma.ProductCreateManyInput[]
 
+const ADMIN_EMAIL = "admin@mail.com"
+const MIN_ADMIN_PASSWORD_LENGTH = 12
+
+// The admin account is created only when SEED_ADMIN_PASSWORD is set, so a public
+// demo never ships an admin with a published password. Its password is that value.
+async function seedAdmin() {
+  const password = process.env.SEED_ADMIN_PASSWORD
+  if (!password) {
+    console.log(`SEED_ADMIN_PASSWORD is not set; skipping the ${ADMIN_EMAIL} admin account.`)
+    return
+  }
+  if (password.length < MIN_ADMIN_PASSWORD_LENGTH || password === "demo-password") {
+    throw new Error(`SEED_ADMIN_PASSWORD must be at least ${MIN_ADMIN_PASSWORD_LENGTH} characters and not the demo password`)
+  }
+  const passwordHash = await hash(password, 12)
+
+  // The admin account has no cart.
+  await prisma.user.createMany({
+    data: [
+      { id: 2, email: ADMIN_EMAIL, passwordHash, firstName: "Admin", lastName: "Candy", role: "ADMIN" },
+    ],
+    skipDuplicates: true
+  })
+  // Only refresh the admin itself; never promote whichever other user happens to hold id 2.
+  const adminSlot = await prisma.user.findUnique({ where: { id: 2 }, select: { email: true } })
+  if (adminSlot && adminSlot.email !== ADMIN_EMAIL) {
+    throw new Error(`User id 2 is reserved for ${ADMIN_EMAIL} but belongs to ${adminSlot.email}`)
+  }
+  await prisma.user.update({
+    where: { id: 2, email: ADMIN_EMAIL },
+    data: { passwordHash, role: "ADMIN" }
+  })
+}
+
 async function main() {
   const demoPasswordHash = await hash("demo-password", 12)
 
@@ -65,14 +99,6 @@ async function main() {
     skipDuplicates: true
   })
 
-  // The admin demo account has no cart.
-  await prisma.user.createMany({
-    data: [
-      { id: 2, email: "admin@mail.com", passwordHash: demoPasswordHash, firstName: "Admin", lastName: "Candy", role: "ADMIN" },
-    ],
-    skipDuplicates: true
-  })
-
   await prisma.user.update({
     where: { id: 0 },
     data: { email: "user1@mail.com", passwordHash: demoPasswordHash }
@@ -81,15 +107,7 @@ async function main() {
     where: { id: 1 },
     data: { email: "user2@mail.com", passwordHash: demoPasswordHash }
   })
-  // Only refresh the demo admin itself; never promote whichever other user happens to hold id 2.
-  const adminSlot = await prisma.user.findUnique({ where: { id: 2 }, select: { email: true } })
-  if (adminSlot && adminSlot.email !== "admin@mail.com") {
-    throw new Error(`User id 2 is reserved for admin@mail.com but belongs to ${adminSlot.email}`)
-  }
-  await prisma.user.update({
-    where: { id: 2, email: "admin@mail.com" },
-    data: { passwordHash: demoPasswordHash, role: "ADMIN" }
-  })
+  await seedAdmin()
   // Fill a fictional address only where none is registered, keeping addresses edited in the demo.
   await prisma.user.updateMany({
     where: { id: { in: [0, 1] }, postalCode: null },

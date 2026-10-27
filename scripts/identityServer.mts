@@ -22,7 +22,7 @@ export function identityServerEnv({ issuer, clientSecret, storeOrigins, database
     OIDC_CLIENT_SECRET: clientSecret,
     OIDC_REDIRECT_URIS: storeOrigins.map((origin) => `${origin}/api/auth/callback/candy-rain-id`).join(","),
     OIDC_POST_LOGOUT_REDIRECT_URIS: storeOrigins.map((origin) => `${origin}/signout`).join(","),
-    LOGIN_HINT: "デモ: user1@mail.com / demo-password（管理者: admin@mail.com / demo-password）",
+    LOGIN_HINT: "デモ: user1@mail.com / demo-password",
   }
 }
 

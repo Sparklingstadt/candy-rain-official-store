@@ -43,10 +43,13 @@ export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.P
     }
   },
   // The seeded admin account is shared and read-only here, so there is nothing to create or clean up.
+  // The seed creates it only when SEED_ADMIN_PASSWORD is set, with that password.
   admin: async ({}, provide) => {
     const email = "admin@mail.com"
+    const password = process.env.SEED_ADMIN_PASSWORD
+    if (!password) throw new Error("Set SEED_ADMIN_PASSWORD and run npm run db:seed before E2E tests")
     await provide({ email, signIn: async page => {
-      await signInWithCandyRainId(page, email)
+      await signInWithCandyRainId(page, email, password)
       await expect(page).toHaveURL(/\/admin\/dashboard$/)
     } })
   },
