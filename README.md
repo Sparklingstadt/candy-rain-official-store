@@ -2,7 +2,7 @@
 
 Candy Rain は「小さなときめきを、ひと箱に。」をコンセプトに、オリジナルグッズの商品選びから購入手続きまでを体験できる EC ストアのデモ Web アプリです。リポジトリ名は `candy-rain-official-store` です。
 
-**[デモを開く](https://candy-rain-store.vercel.app)**
+**[デモを開く](https://candy-rain-official-store.vercel.app)**
 
 ## 開発の目的
 
@@ -134,7 +134,7 @@ main への push では、2つの検証ジョブと `CI passed` の成功後に 
 
 書き込み権限は `release` ジョブだけに付与し、リリース処理は直列化します。main の実行は新しい push で中断しません。Vercel デプロイは別途行い、本番 DB の migration は既存の手動ワークフローを使用します。
 
-本番は [Vercel](https://candy-rain-store.vercel.app) で公開しています。通常のビルドは DB を更新しません。DB の migration は対象の `DATABASE_URL` を確認して `npm run db:migrate` を実行するか、[Migrate production database](.github/workflows/migrate-production.yml) を手動実行します。後者では GitHub の `production` Environment に `DATABASE_URL` secret を設定します。
+本番は [Vercel](https://candy-rain-official-store.vercel.app) で公開しています。通常のビルドは DB を更新しません。DB の migration は対象の `DATABASE_URL` を確認して `npm run db:migrate` を実行するか、[Migrate production database](.github/workflows/migrate-production.yml) を手動実行します。後者では GitHub の `production` Environment に `DATABASE_URL` secret を設定します。
 
 管理画面で登録できる商品は 30 件までで、物理削除の画面はありません。公開デモで上限に達した場合は、注文に使われていない登録商品（ID 5 以上）を次のコマンドで削除できます。既定は対象の一覧を表示するだけで、`--apply` を付けたときだけ削除します。注文履歴のある商品とシードの商品（ID 0〜4）は削除しません。
 
