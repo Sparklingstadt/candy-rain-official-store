@@ -10,7 +10,7 @@ export default function SignOut({ compact = false }: { compact?: boolean }) {
   const handleSignOut = async () => {
     setIsPending(true)
     try {
-      await signOut({ redirectTo: "/signout" })
+      await signOut({ redirectTo: "/api/signout-redirect" })
     } finally {
       setIsPending(false)
     }
