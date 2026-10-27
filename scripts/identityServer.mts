@@ -1,7 +1,7 @@
 // Local development and E2E tests sign in through a real Candy Rain ID
 // (candy-rain-identity-server). `go run` builds this exact commit, so Go is the
 // only extra requirement; bump the version here to test a newer server.
-export const identityServerModule = "github.com/Sparklingstadt/candy-rain-identity-server/cmd/server@60cff0746f07"
+export const identityServerModule = "github.com/Sparklingstadt/candy-rain-identity-server/cmd/server@b1c868a78ef4"
 
 export const candyRainIdClientId = "candy-rain-store"
 

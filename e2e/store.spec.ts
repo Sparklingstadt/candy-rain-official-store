@@ -79,6 +79,8 @@ test("在庫不足を表示し、購入を再試行できる状態に戻す", as
   await signIn(page)
   await page.getByRole("link", { name: /ランダム缶バッジ/ }).click()
   await page.getByRole("button", { name: "カートに追加" }).click()
+  // Wait for the item to land in the cart; emptying the stock first makes the add itself fail.
+  await expect(page.getByRole("link", { name: "カート(1)" })).toBeVisible()
   await database.query('UPDATE "Variant" SET stock = 0 WHERE id = $1', [0])
 
   try {
