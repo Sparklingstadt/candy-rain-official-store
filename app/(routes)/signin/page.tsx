@@ -28,7 +28,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
           <p className="font-medium">デモアカウント</p>
           <p className="mt-2 text-muted-foreground">メールアドレス: user1@mail.com</p>
           <p className="text-muted-foreground">パスワード: demo-password</p>
-          <p className="mt-2 text-muted-foreground">管理者: admin@mail.com / demo-password</p>
         </div>
       </CardContent>
     </Card>

@@ -20,7 +20,7 @@ Candy Rain は「小さなときめきを、ひと箱に。」をコンセプト
 | 決済・送料 | Stripe のテストモードでカードを登録・選択して決済（キー未設定時は決済なし）。デモ送料は 1,000 円 |
 | 管理画面 | 管理者のみ。ダッシュボード（対応待ち・今日と今月の売上・最新の注文・商品の状態）、全注文の一覧・絞り込み、発送ステータスの変更、キャンセル時の在庫戻しと Stripe 返金、在庫の増減・価格の変更、商品・バリエーションの登録・編集と公開／非公開の切り替え（商品一覧はカード表示とリスト表示を切り替えられる）（非公開のものはストアに表示されず、カートにあっても購入できない） |
 
-デモのサインイン情報（顧客と管理者）はサインイン画面に記載しています。入力は Candy Rain ID の画面で行います。
+デモ顧客のサインイン情報はサインイン画面に記載しています。入力は Candy Rain ID の画面で行います。管理者アカウント（`admin@mail.com`）は公開しておらず、`SEED_ADMIN_PASSWORD` を設定して seed したときだけ、そのパスワードで作成されます。
 
 ## 使用しているもの
 
@@ -95,7 +95,7 @@ npm run dev
 
 カード決済を試す場合は、[Stripe のテストモード](https://docs.stripe.com/keys#test-live-modes)の API キーを `.env` の `STRIPE_SECRET_KEY`（`sk_test_` から始まる値）と `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`（`pk_test_`）に設定します。未設定の場合は決済なしで注文が確定します。本番用のキーは受け付けません。
 
-[localhost:3000](http://localhost:3000) を開きます。`db:setup` は設定確認、DB 起動、migration、seed を順に実行します。seed はデモユーザーのパスワード更新も含むため、学習用 DB を対象にしてください。
+[localhost:3000](http://localhost:3000) を開きます。`db:setup` は設定確認、DB 起動、migration、seed を順に実行します。seed はデモユーザーのパスワード更新も含むため、学習用 DB を対象にしてください。管理画面を使う場合は、seed の前に `.env` の `SEED_ADMIN_PASSWORD` に12文字以上のパスワードを設定します（未設定なら管理者は作成されません）。
 
 5432 番ポートが使用中の場合は `.env` の `POSTGRES_PORT` と `DATABASE_URL` のポートを両方とも空きポートに変更します。`npm run dev` は設定を確認し PostgreSQL コンテナを起動してから、Candy Rain ID（`http://localhost:8080`）と Next.js を起動します。Candy Rain ID は同じ DB の `User` テーブルを参照するため、seed のデモユーザーでそのままサインインできます。使う Candy Rain ID のバージョンは [scripts/identityServer.mts](scripts/identityServer.mts) で固定しています。
 

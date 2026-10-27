@@ -61,6 +61,8 @@ jobs:
     env:
       DATABASE_URL: postgresql://user:pass@127.0.0.1:5432/candyrain
       AUTH_SECRET: ci-only-secret
+      # The seed creates the admin account only when this is set; E2E signs in with it.
+      SEED_ADMIN_PASSWORD: ci-only-admin-password
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
