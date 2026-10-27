@@ -16,7 +16,7 @@
   - text: 常設 グッズ
   - heading "クリアファイル" [level=1]
   - paragraph: /¥\d+クリアファイル A/
-  - paragraph: 日常にさりげない彩りを添える、Candy Rain Storeのオリジナルアイテムです。
+  - paragraph: 日常にさりげない彩りを添える、Candy Rain Official Storeのオリジナルアイテムです。
   - paragraph: バリエーションを選択
   - button /クリアファイル A ¥\d+/ [pressed]
   - button /クリアファイル B ¥\d+/

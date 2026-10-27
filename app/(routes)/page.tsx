@@ -45,7 +45,7 @@ export default async function Page(){
           <CandyPill>Full-stack demo store</CandyPill>
           <div className="space-y-5">
             <h1 className="text-4xl font-semibold leading-[1.2] tracking-[-0.04em] sm:text-6xl lg:text-5xl xl:text-6xl"><span className="whitespace-nowrap">小さなときめきを、</span><br /><span className="whitespace-nowrap">ひと箱に。</span></h1>
-            <p className="max-w-xl text-lg leading-8 text-muted-foreground">Candy Rain Storeは、商品選びから注文履歴までのEC購入体験を実装したデモストアです。</p>
+            <p className="max-w-xl text-lg leading-8 text-muted-foreground">Candy Rain Official Storeは、商品選びから注文履歴までのEC購入体験を実装したデモストアです。</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link href="/products" className={buttonVariants({ size: "lg", className: "h-11 px-5" })}>商品を見る <ArrowRight /></Link>

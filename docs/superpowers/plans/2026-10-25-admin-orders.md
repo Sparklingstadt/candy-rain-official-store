@@ -226,7 +226,7 @@ Expected: FAIL（`/admin/orders` が 404、管理者が `/products` に留まる
     - 非管理者が `/admin` または `/admin/` 配下 → `/products`
     - 管理者が `/admin` 配下・`/signout` 以外 → `/admin`
   - `SignInForm` の `redirect("/products")` は変えない（管理者は proxy が `/admin` へ送る）。
-  - `app/admin/layout.tsx`：`await requireAdmin()` の後、`AdminHeader` と `<main className="page-shell flex-1 py-8 sm:py-12">` を描画する。メタデータの title テンプレートは `"%s | 管理画面 | Candy Rain Store"`。
+  - `app/admin/layout.tsx`：`await requireAdmin()` の後、`AdminHeader` と `<main className="page-shell flex-1 py-8 sm:py-12">` を描画する。メタデータの title テンプレートは `"%s | 管理画面 | Candy Rain Official Store"`。
   - `app/admin/page.tsx`：`redirect("/admin/orders")`。
   - `app/admin/not-found.tsx`：「注文が見つかりません」と「注文一覧へ」リンク（`EmptyState` を再利用）。
   - サインイン画面の入力例に、既存の段落と同じ形で「管理者: admin@mail.com / demo-password」を追加する。

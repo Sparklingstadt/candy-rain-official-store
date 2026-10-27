@@ -1,6 +1,6 @@
-# Candy Rain Store
+# Candy Rain Official Store
 
-Candy Rain は「小さなときめきを、ひと箱に。」をコンセプトに、オリジナルグッズの商品選びから購入手続きまでを体験できる EC ストアのデモ Web アプリです。リポジトリ名は `prd-candy-rain-store` です。
+Candy Rain は「小さなときめきを、ひと箱に。」をコンセプトに、オリジナルグッズの商品選びから購入手続きまでを体験できる EC ストアのデモ Web アプリです。リポジトリ名は `candy-rain-official-store` です。
 
 **[デモを開く](https://candy-rain-store.vercel.app)**
 
@@ -73,8 +73,8 @@ Prisma → PostgreSQL
 Node.js 26 と npm 11.6.2 を使用します（CI と同じ構成）。Vercel は Node.js 26 に未対応のため、本番はプロジェクト設定の Node.js 24 でビルドします。
 
 ```bash
-git clone https://github.com/Sparklingstadt/prd-candy-rain-store.git
-cd prd-candy-rain-store
+git clone https://github.com/Sparklingstadt/candy-rain-official-store.git
+cd candy-rain-official-store
 npm ci
 ```
 

@@ -1,5 +1,5 @@
 - main:
   - heading "サインアウトしました" [level=1]
-  - paragraph: Candy Rain Storeをご利用いただきありがとうございます。
+  - paragraph: Candy Rain Official Storeをご利用いただきありがとうございます。
   - link "サインインページへ戻る":
     - /url: /signin

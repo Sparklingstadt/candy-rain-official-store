@@ -28,7 +28,7 @@ export default function StoreFooter() {
           </div>
         </div>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <p>© 2026 Candy Rain Store</p>
+          <p>© 2026 Candy Rain Official Store</p>
           <span aria-hidden="true" className="flex gap-1.5">
             <span className="size-1.5 bg-candy-pink-strong" />
             <span className="size-1.5 bg-candy-mint-strong" />

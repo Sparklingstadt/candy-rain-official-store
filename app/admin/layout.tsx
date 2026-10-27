@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth"
 import AdminHeader from "@/app/admin/components/AdminHeader"
 
 export const metadata: Metadata = {
-  title: { template: "%s | 管理画面 | Candy Rain Store", default: "管理画面 | Candy Rain Store" },
+  title: { template: "%s | 管理画面 | Candy Rain Official Store", default: "管理画面 | Candy Rain Official Store" },
 }
 
 export default async function AdminLayout({
