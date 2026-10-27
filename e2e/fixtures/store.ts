@@ -7,6 +7,17 @@ type Shopper = { id: number; email: string; signIn: (page: Page) => Promise<void
 type Admin = { email: string; signIn: (page: Page) => Promise<void> }
 type E2eProduct = { name: string }
 
+// Signs in through Candy Rain ID: the store's button sends the browser to the
+// identity server's form, which redirects back to the store after checking the password.
+export async function signInWithCandyRainId(page: Page, email: string, password = "demo-password") {
+  await page.goto("/signin")
+  await page.getByRole("button", { name: "Candy Rain ID でサインイン", exact: true }).click()
+  await expect(page.getByRole("heading", { name: "サインイン", exact: true })).toBeVisible()
+  await page.getByLabel("メールアドレス", { exact: true }).fill(email)
+  await page.getByLabel("パスワード", { exact: true }).fill(password)
+  await page.getByRole("button", { name: "サインイン", exact: true }).click()
+}
+
 export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.Pool; seedVariant1: void; e2eProduct: E2eProduct }>({
   database: async ({}, provide) => {
     const database = new pg.Pool({ connectionString: process.env.DATABASE_URL })
@@ -35,10 +46,7 @@ export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.P
   admin: async ({}, provide) => {
     const email = "admin@mail.com"
     await provide({ email, signIn: async page => {
-      await page.goto("/signin")
-      await page.getByLabel("メールアドレス", { exact: true }).fill(email)
-      await page.getByLabel("パスワード", { exact: true }).fill("demo-password")
-      await page.getByRole("button", { name: "サインイン", exact: true }).click()
+      await signInWithCandyRainId(page, email)
       await expect(page).toHaveURL(/\/admin\/dashboard$/)
     } })
   },
@@ -53,10 +61,7 @@ export const test = base.extend<{ shopper: Shopper; admin: Admin; database: pg.P
     try {
       await database.query('INSERT INTO "Cart" ("userId") VALUES ($1)', [id])
       await provide({ id, email, signIn: async page => {
-        await page.goto("/signin")
-        await page.getByLabel("メールアドレス", { exact: true }).fill(email)
-        await page.getByLabel("パスワード", { exact: true }).fill("demo-password")
-        await page.getByRole("button", { name: "サインイン", exact: true }).click()
+        await signInWithCandyRainId(page, email)
         await expect(page).toHaveURL(/\/products$/)
         await expect(page.getByRole("heading", { name: "商品一覧", exact: true })).toBeVisible()
       } })

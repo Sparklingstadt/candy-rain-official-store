@@ -8,7 +8,7 @@ export default function SignInButton() {
   return (
     <Button type="submit" size="lg" className="h-11 w-full" disabled={pending}>
       {pending && <LoaderCircle className="animate-spin" />}
-      {pending ? "サインイン中..." : "サインイン"}
+      {pending ? "Candy Rain ID へ移動中..." : "Candy Rain ID でサインイン"}
     </Button>
   )
 }

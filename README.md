@@ -16,11 +16,11 @@ Candy Rain は「小さなときめきを、ひと箱に。」をコンセプト
 | カート | サインインしたユーザーごとに DB へ保存 |
 | 数量変更・削除 | 入力値・所有者・在庫を確認 |
 | 購入手続き | 在庫減算・注文作成・カート削除を一つのトランザクションで実行 |
-| アカウント・注文履歴 | Auth.js のデモ認証（任意で [Candy Rain ID](https://github.com/Sparklingstadt/candy-rain-identity-server) の OpenID Connect でもサインイン可）、氏名・お届け先の編集、注文一覧・詳細 |
+| アカウント・注文履歴 | [Candy Rain ID](https://github.com/Sparklingstadt/candy-rain-identity-server)（Go 製の OpenID Connect 認証サーバー）経由のサインイン、氏名・お届け先の編集、注文一覧・詳細 |
 | 決済・送料 | Stripe のテストモードでカードを登録・選択して決済（キー未設定時は決済なし）。デモ送料は 1,000 円 |
 | 管理画面 | 管理者のみ。ダッシュボード（対応待ち・今日と今月の売上・最新の注文・商品の状態）、全注文の一覧・絞り込み、発送ステータスの変更、キャンセル時の在庫戻しと Stripe 返金、在庫の増減・価格の変更、商品・バリエーションの登録・編集と公開／非公開の切り替え（商品一覧はカード表示とリスト表示を切り替えられる）（非公開のものはストアに表示されず、カートにあっても購入できない） |
 
-デモのサインイン情報（顧客と管理者）はサインイン画面に記載しています。
+デモのサインイン情報（顧客と管理者）はサインイン画面に記載しています。入力は Candy Rain ID の画面で行います。
 
 ## 使用しているもの
 
@@ -28,7 +28,8 @@ Candy Rain は「小さなときめきを、ひと箱に。」をコンセプト
 | --- | --- |
 | Next.js 16 / React 19 / TypeScript | App Router、Server Components、Server Actions による UI とサーバー処理 |
 | Prisma ORM 7 / PostgreSQL | 商品・ユーザー・カート・注文の永続化とトランザクション |
-| Auth.js 5 beta / bcryptjs | Credentials 認証とパスワードハッシュの照合 |
+| Auth.js 5 beta / [Candy Rain ID](https://github.com/Sparklingstadt/candy-rain-identity-server) | OpenID Connect（認可コードフロー + PKCE）によるサインイン。パスワードの照合は Candy Rain ID が行う |
+| bcryptjs | seed でのデモユーザーのパスワードハッシュ生成 |
 | Stripe（テストモード） | カードの保存（SetupIntent）と与信・売上確定（PaymentIntent） |
 | Tailwind CSS 4 / shadcn/ui / Base UI / Lucide | レスポンシブ UI と共通コンポーネント |
 | Node.js Test Runner / tsx / Playwright | 単体・DB 統合・ブラウザー E2E テスト |
@@ -70,7 +71,7 @@ Prisma → PostgreSQL
 
 ## ローカル開発
 
-Node.js 26 と npm 11.6.2 を使用します（CI と同じ構成）。Vercel は Node.js 26 に未対応のため、本番はプロジェクト設定の Node.js 24 でビルドします。
+Node.js 26 と npm 11.6.2 を使用します（CI と同じ構成）。Vercel は Node.js 26 に未対応のため、本番はプロジェクト設定の Node.js 24 でビルドします。サインインに使う Candy Rain ID を `go run` で起動するため、[Go](https://go.dev/dl/) 1.26 以降も必要です。
 
 ```bash
 git clone https://github.com/Sparklingstadt/candy-rain-official-store.git
@@ -96,7 +97,7 @@ npm run dev
 
 [localhost:3000](http://localhost:3000) を開きます。`db:setup` は設定確認、DB 起動、migration、seed を順に実行します。seed はデモユーザーのパスワード更新も含むため、学習用 DB を対象にしてください。
 
-5432 番ポートが使用中の場合は `.env` の `POSTGRES_PORT` と `DATABASE_URL` のポートを両方とも空きポートに変更します。`npm run dev` は設定を確認し PostgreSQL コンテナを起動してから Next.js を起動します。
+5432 番ポートが使用中の場合は `.env` の `POSTGRES_PORT` と `DATABASE_URL` のポートを両方とも空きポートに変更します。`npm run dev` は設定を確認し PostgreSQL コンテナを起動してから、Candy Rain ID（`http://localhost:8080`）と Next.js を起動します。Candy Rain ID は同じ DB の `User` テーブルを参照するため、seed のデモユーザーでそのままサインインできます。使う Candy Rain ID のバージョンは [scripts/identityServer.mts](scripts/identityServer.mts) で固定しています。
 
 ```bash
 npm run db:start  # PostgreSQL を起動し healthcheck を待つ
@@ -123,7 +124,7 @@ DB 統合・E2E テストには migration と seed を適用した専用のロ�
 | ジョブ | 検証内容 |
 | --- | --- |
 | `verify` | 本番依存の npm audit（moderate 以上で失敗）、単体テスト、lint、Prisma・Next.js の型生成と TypeScript チェック、本番ビルド |
-| `e2e` | 一時的な PostgreSQL 18 に schema 検証・migration・seed を適用し、DB 統合テストと Playwright テスト |
+| `e2e` | 一時的な PostgreSQL 18 に schema 検証・migration・seed を適用し、DB 統合テストと Playwright テスト。サインインは `go run` で起動した Candy Rain ID を経由する |
 | `CI passed` | 上記2ジョブがすべて成功したことを確認（失敗・キャンセル・スキップは不合格） |
 
 ブランチ保護の必須チェックには `CI passed` を指定できます（リポジトリ側で別途設定）。E2E ジョブの HTML レポートと失敗時の trace・スクリーンショットは `playwright-local` Artifact に7日間保存します。CI 中の `test.only` を禁止します。テストは一時 DB を使い、本番の認証情報を必要としません。

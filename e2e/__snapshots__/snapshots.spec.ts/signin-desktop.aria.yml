@@ -1,10 +1,7 @@
 - main:
-  - text: Demo account おかえりなさい デモアカウントでストアへサインインします。 メールアドレス
-  - textbox "メールアドレス": user1@mail.com
-  - text: パスワード
-  - textbox "パスワード": demo-password
-  - button "サインイン"
-  - paragraph: 入力例
+  - text: Demo account おかえりなさい Candy Rain ID でストアへサインインします。
+  - button "Candy Rain ID でサインイン"
+  - paragraph: デモアカウント
   - paragraph: "メールアドレス: user1@mail.com"
   - paragraph: "パスワード: demo-password"
   - paragraph: "管理者: admin@mail.com / demo-password"

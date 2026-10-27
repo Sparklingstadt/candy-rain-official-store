@@ -72,6 +72,11 @@ jobs:
       - run: npm install --global npm@11.6.2
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      # E2E sign-in goes through Candy Rain ID, which Playwright starts with `go run`.
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.26"
+          cache: false
       - run: npx prisma generate
       - run: npx prisma validate
       - run: npm run db:migrate

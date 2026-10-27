@@ -49,7 +49,7 @@ test.describe("ページ表示 (#4)", () => {
       expect(new URL(response.headers().location, response.url()).pathname).toBe("/signin")
     }
     await page.getByRole("link", { name: "サインインページへ戻る" }).click()
-    await expect(page.getByRole("button", { name: "サインイン", exact: true })).toBeVisible()
+    await expect(page.getByRole("button", { name: "Candy Rain ID でサインイン", exact: true })).toBeVisible()
     await page.goto("/account")
     await expect(page).toHaveURL(/\/signin$/)
   })
