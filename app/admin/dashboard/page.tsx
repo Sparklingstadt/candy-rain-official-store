@@ -64,6 +64,7 @@ function OrderTable({ orders, label }: { orders: AdminOrderSummary[], label: str
             <TableHead>注文日時</TableHead>
             <TableHead>注文者</TableHead>
             <TableHead className="text-right">金額</TableHead>
+            <TableHead>決済状態</TableHead>
             <TableHead>発送状態</TableHead>
           </TableRow>
         </TableHeader>
@@ -74,6 +75,7 @@ function OrderTable({ orders, label }: { orders: AdminOrderSummary[], label: str
               <TableCell>{formatOrderDateTime(order.orderedAt)}</TableCell>
               <TableCell>{order.customerName}</TableCell>
               <TableCell className="text-right font-semibold">{formatPrice(order.totalPrice)}</TableCell>
+              <TableCell><Badge variant="outline">{order.paymentStatus}</Badge></TableCell>
               <TableCell><Badge variant="outline">{order.shippingStatus}</Badge></TableCell>
             </TableRow>
           ))}
@@ -110,14 +112,21 @@ export default async function Page() {
         ) : null}
       </Section>
 
-      <Section id="dashboard-sales" title="売上">
-        <p className="text-sm text-muted-foreground">送料込み・キャンセルを除く（日本時間）</p>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Stat label="今日の注文" value={`${sales.today.orderCount} 件`} />
-          <Stat label="今日の売上" value={formatPrice(sales.today.totalPrice)} />
-          <Stat label="今月の注文" value={`${sales.month.orderCount} 件`} />
-          <Stat label="今月の売上" value={formatPrice(sales.month.totalPrice)} />
+      <Section id="dashboard-sales" title="注文と売上">
+        <p className="text-sm text-muted-foreground">注文日時を基準に日本時間で集計。すべて送料込み・キャンセルを除きます。</p>
+        <p className="text-sm text-muted-foreground">注文総額は未決済・決済エラーも含みます。決済済み売上は「支払い済み」の注文のみで、支払い待ち・決済エラー・返金済み・返金エラーは含みません。</p>
+        <div className="grid gap-3 lg:grid-cols-2">
+          {([
+            ["今日", sales.today],
+            ["今月", sales.month],
+          ] as const).map(([period, figures]) => (
+            <div key={period} className="grid grid-cols-2 gap-3">
+              <Stat label={`${period}の注文総額`} value={formatPrice(figures.totalPrice)} note={`${figures.orderCount} 件・未決済を含む`} />
+              <Stat label={`${period}の決済済み売上`} value={formatPrice(figures.paidTotalPrice)} note={`${figures.paidOrderCount} 件・支払い済みのみ`} />
+            </div>
+          ))}
         </div>
+        <p className="text-sm text-muted-foreground">過去の注文をキャンセル・返金すると、その注文日の集計が変わります。入金日・返金日ごとの収支ではありません。キャンセル後の返金失敗も売上から除かれるため、未解決の返金は「対応待ち」で確認してください。</p>
       </Section>
 
       <Section id="dashboard-recent-orders" title="最新の注文" action={<SectionLink href="/admin/orders">注文一覧へ</SectionLink>}>
