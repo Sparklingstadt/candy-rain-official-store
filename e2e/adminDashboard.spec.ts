@@ -14,8 +14,10 @@ async function count(database: pg.Pool, sql: string) {
 }
 
 async function salesSince(database: pg.Pool, unit: "day" | "month") {
-  const result = await database.query<{ orders: number, total: number }>(
-    `SELECT count(*)::int AS orders, COALESCE(sum("totalPrice"), 0)::int AS total FROM "Order"
+  const result = await database.query<{ orders: number, total: number, paid: number, paidOrders: number }>(
+    `SELECT count(*)::int AS orders, COALESCE(sum("totalPrice"), 0)::int AS total,
+     COALESCE(sum("totalPrice") FILTER (WHERE "paymentStatus" = '支払い済み'), 0)::int AS paid,
+     count(*) FILTER (WHERE "paymentStatus" = '支払い済み')::int AS "paidOrders" FROM "Order"
      WHERE "orderedAt" >= ${tokyoStart(unit)} AND "shippingStatus" <> 'キャンセル'`,
   )
   return result.rows[0]
@@ -67,12 +69,17 @@ test("管理者は /admin とロゴのリンクからダッシュボードを開
 test("表示される数が DB の集計と一致する", async ({ page, admin, shopper, database }) => {
   // Orders on both sides of Japan-time midnight (and a cancelled one) make today and this month differ, so swapped
   // or UTC-based boundaries would show the wrong figures. The shopper fixture deletes these orders afterwards.
-  const insert = (orderedAt: string, totalPrice: number, shippingStatus = "未発送") => database.query(
+  const insert = (orderedAt: string, totalPrice: number, shippingStatus = "未発送", paymentStatus = "支払い待ち") => database.query(
     `INSERT INTO "Order" ("userId", "paymentStatus", "shippingStatus", "shippingPrice", "totalPrice", "orderedAt")
-     VALUES ($1, '支払い待ち', $2, 1000, $3, ${orderedAt})`, [shopper.id, shippingStatus, totalPrice])
+     VALUES ($1, $4, $2, 1000, $3, ${orderedAt})`, [shopper.id, shippingStatus, totalPrice, paymentStatus])
   await insert(`${tokyoStart("day")} + interval '1 second'`, 1111)
   await insert(`${tokyoStart("day")} - interval '1 second'`, 2222)
   await insert(`${tokyoStart("day")} + interval '2 seconds'`, 4444, "キャンセル")
+  for (const [index, status] of ["支払い済み", "決済エラー", "返金済み", "返金エラー"].entries()) {
+    await insert(`${tokyoStart("day")} + interval '3 seconds'`, 5000 + index, "未発送", status)
+    await insert(`${tokyoStart("day")} + interval '4 seconds'`, 9000 + index, "キャンセル", status)
+  }
+  await insert(`${tokyoStart("day")} - interval '1 second'`, 7777, "未発送", "支払い済み")
   const isFirstOfMonth = (await count(database, `SELECT (${tokyoStart("day")} = ${tokyoStart("month")})::int`)) === 1
 
   await admin.signIn(page)
@@ -98,17 +105,23 @@ test("表示される数が DB の集計と一致する", async ({ page, admin, 
   expect(await stat(page, "対応待ち", "発送準備中")).toBe(`${expected.preparing} 件`)
   expect(await stat(page, "対応待ち", "返金エラー")).toBe(`${expected.refundErrors} 件`)
   expect(await stat(page, "対応待ち", "売り切れ")).toBe(`${expected.soldOut} 件`)
-  expect(await stat(page, "売上", "今日の注文")).toBe(`${today.orders} 件`)
-  expect(await stat(page, "売上", "今日の売上")).toBe(yen(today.total))
-  expect(await stat(page, "売上", "今月の注文")).toBe(`${month.orders} 件`)
-  expect(await stat(page, "売上", "今月の売上")).toBe(yen(month.total))
+  expect(await stat(page, "注文と売上", "今日の注文総額")).toBe(yen(today.total))
+  expect(await stat(page, "注文と売上", "今月の注文総額")).toBe(yen(month.total))
+  expect(await stat(page, "注文と売上", "今日の決済済み売上")).toBe(yen(today.paid))
+  expect(await stat(page, "注文と売上", "今月の決済済み売上")).toBe(yen(month.paid))
+  const sales = page.getByRole("region", { name: "注文と売上" })
+  for (const [period, figures] of [["今日", today], ["今月", month]] as const) {
+    await expect(sales.getByText(`${period}の注文総額`, { exact: true }).locator("xpath=..")).toContainText(`${figures.orders} 件・未決済を含む`)
+    await expect(sales.getByText(`${period}の決済済み売上`, { exact: true }).locator("xpath=..")).toContainText(`${figures.paidOrders} 件・支払い済みのみ`)
+  }
+  await expect(page.getByRole("columnheader", { name: "決済状態" }).first()).toBeVisible()
   expect(await stat(page, "商品の状態", "公開中")).toBe(`${expected.published} 件`)
   expect(await stat(page, "商品の状態", "非公開")).toBe(`${expected.unpublished} 件`)
   expect(await stat(page, "商品の状態", "ストアに未表示")).toBe(`${expected.notListed} 件`)
   expect(await stat(page, "商品の状態", "登録数")).toBe(`${expected.products} / 30 件`)
 })
 
-test("注文すると最新の注文と未発送・今日の売上に反映され、キャンセルすると売上から外れる", async ({ page, shopper, admin, browser, database }) => {
+test("注文すると最新の注文と未発送・今日の注文総額に反映され、キャンセルすると注文総額から外れる", async ({ page, shopper, admin, browser, database }) => {
   const adminContext = await browser.newContext()
   try {
     const adminPage = await adminContext.newPage()
@@ -124,14 +137,17 @@ test("注文すると最新の注文と未発送・今日の売上に反映さ�
     await expect(latest).toContainText(`#${orderId}`)
     await expect(latest).toContainText("未発送")
     expect(await stat(adminPage, "対応待ち", "未発送")).toBe(`${Number.parseInt(unshippedBefore) + 1} 件`)
-    expect(await stat(adminPage, "売上", "今日の売上")).toBe(yen(salesBefore.total + rows[0].total))
+    expect(await stat(adminPage, "注文と売上", "今日の注文総額")).toBe(yen(salesBefore.total + rows[0].total))
+    // Demo checkout is unpaid: it increases order value but never paid sales.
+    expect(await stat(adminPage, "注文と売上", "今日の決済済み売上")).toBe(yen(salesBefore.paid))
 
     await latest.getByRole("link", { name: `#${orderId}` }).click()
     await adminPage.getByLabel("在庫を戻し、返金することを確認しました").check()
     await adminPage.getByRole("button", { name: "注文をキャンセル" }).click()
     await expect(adminPage.getByText("注文をキャンセルしました")).toBeVisible()
     await adminPage.goto("/admin/dashboard")
-    expect(await stat(adminPage, "売上", "今日の売上")).toBe(yen(salesBefore.total))
+    expect(await stat(adminPage, "注文と売上", "今日の注文総額")).toBe(yen(salesBefore.total))
+    expect(await stat(adminPage, "注文と売上", "今日の決済済み売上")).toBe(yen(salesBefore.paid))
     expect(await stat(adminPage, "対応待ち", "未発送")).toBe(unshippedBefore)
   } finally {
     await adminContext.close()
